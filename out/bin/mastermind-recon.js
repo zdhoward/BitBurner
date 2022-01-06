@@ -26,23 +26,18 @@ export async function main(ns) {
 
     await serverScanRecursive(ns, ns.getHostname());
 
-    var [bestTarget, hackableServers] = chooseBestTarget(ns);
-
+    var hackableServers = getHackableServerNames(ns);
     var bestTargets = serializeDict(await findBestTargets(ns));
 
     //ns.tprint(bestTargets);
 
-    if (target == '') {
-        target = bestTarget;
-    }
+    //displayServerInfo(ns, target);
 
-    displayServerInfo(ns, target);
-
-    ns.toast('MASTERMIND: ' + 'Target = ' + target, 'success', 5000);
+    //ns.toast('MASTERMIND: ' + 'Target = ' + target, 'success', 5000);
 
     //run deploy with results
     //ns.run('/bin/mastermind-deploy.js', 1, target, bestTargets, hackableServers.toString());
-    ns.run('/bin/mastermind-deploy2.js', 1, bestTargets, hackableServers.toString());
+    ns.run('/bin/mastermind-deploy.js', 1, bestTargets, hackableServers.toString());
 }
 
 /** @param {NS} ns
@@ -94,7 +89,7 @@ function chooseBestTarget(ns) {
 
 /** @param {NS} ns **/
 async function findBestTargets(ns) {
-    ns.tprint('FINDING BEST TARGETS');
+    //ns.tprint('FINDING BEST TARGETS');
     var hackableServers = getHackableServerNames(ns);
 
     var sortedTargets = hackableServers.sort(function (a, b) {

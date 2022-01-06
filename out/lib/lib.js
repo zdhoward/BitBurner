@@ -66,3 +66,22 @@ export function deserializeDict(serialized) {
     }
     return dict
 }
+
+/* @param0 number to zero fill
+ * @param1 length of zero fill
+ * @return zero filled string
+ */
+export function zfill(num, size) {
+    num = num.toString();
+    while (num.length < size) num = "0" + num;
+    return num;
+}
+
+/* @param0 string to pad
+ * @param1 length of padding
+ * @return padded string
+ */
+export function pad(msg, size) {
+    while (msg.length < size) msg = msg + ' ';
+    return msg;
+}

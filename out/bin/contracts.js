@@ -50,7 +50,7 @@ async function getContracts(ns, server) {
     }
 }
 
-async function displayContractInfo(ns, contract, type, description, triesRemaining, data, solution = "NONE") {
+async function displayContractInfo(ns, contract, type, description, triesRemaining, data, solution = "NONE", result = false) {
     ns.print('=========== ' + contract + ' ==========');
     ns.print('== TYPE            :' + type);
     ns.print('== DESCRIPTION     :' + description);
@@ -85,9 +85,8 @@ async function solveContract(ns, contract, server) {
         // Solve
         switch (type) {
             case "Find Largest Prime Factor":
-                var solution = findLargestPrimeFactor(data);
-                var result = ns.codingcontract.attempt(solution, contract, server);
-                displayContractInfo(ns, contract, type, description, triesRemaining, data, solution);
+                var [solution, result] = tryAttempt(findLargestPrimeFactor, data, server);
+                displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
                 break;
             case "Unique Paths in a Grid I":
                 ns.print('== TODO - ' + type);
@@ -111,8 +110,7 @@ async function solveContract(ns, contract, server) {
                 ns.print('== TODO - ' + type);
                 break;
             case "Subarray with Maximum Sum":
-                var solution = subarrayWithLargestSum(data);
-                var result = ns.codingcontract.attempt(solution, contract, server);
+                var [solution, result] = tryAttempt(subarrayWithLargestSum, data, server);
                 displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
                 break;
             case "Find All Valid Math Expressions":
@@ -205,4 +203,12 @@ function subarrayWithLargestSum(array) {
         }
     }
     return bestSubArraySum;
+}
+
+/** @param 0 array to solve for **/
+function tryAttempt(fn, data, server) {
+    var solution = fn(data);
+    var result = ns.codingcontract.attempt(solution, contract, server);
+    ns.toast("CONTRACT: " + contract + (result) ? " SOLVED" : " NOT SOLVED");
+    return [solution, result];
 }
