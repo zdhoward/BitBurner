@@ -6,6 +6,8 @@ export async function main(ns) {
     var reqFiles = ['/bin/contracts.js', '/bin/mastermind-lib.js']
     var server = 'home-contracts';
 
+    ns.run('/bin/extend-overview.js', 1);
+
     // BUY CONTRACT SERVER IF IT DOES NOT EXIST
     if (!ns.serverExists(server)) {
         ns.tprint('BUYING HOME-CONTRACTS SERVER');

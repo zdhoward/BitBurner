@@ -31,7 +31,7 @@ async function serverScanRecursive(ns, hostname) {
     visited[hostname] = true;
 
     //do logic
-    await getContracts(ns, hostname);
+    getContracts(ns, hostname);
 
     var remoteHosts = ns.scan(hostname);
     for (var i in remoteHosts) {
@@ -43,14 +43,14 @@ async function serverScanRecursive(ns, hostname) {
 /** @param {NS} ns
  *  @param 0 server
  */
-async function getContracts(ns, server) {
+function getContracts(ns, server) {
     var files = ns.ls(server, ".cct");
     for (var i = 0; i < files.length; i++) {
-        await solveContract(ns, files[i], server);
+        solveContract(ns, files[i], server);
     }
 }
 
-async function displayContractInfo(ns, contract, type, description, triesRemaining, data, solution = "NONE", result = false) {
+function displayContractInfo(ns, contract, type, description, triesRemaining, data, solution = "NONE", result = false) {
     ns.print('=========== ' + contract + ' ==========');
     ns.print('== TYPE            :' + type);
     ns.print('== DESCRIPTION     :' + description);
@@ -65,7 +65,7 @@ async function displayContractInfo(ns, contract, type, description, triesRemaini
  *  @param 0 server
  *  @param 1 contract
  */
-async function solveContract(ns, contract, server) {
+function solveContract(ns, contract, server) {
     var solvedTypes = ["Find Largest Prime Factor", "Subarray with Maximum Sum"];
     var type = ns.codingcontract.getContractType(contract, server);
     var description = ns.codingcontract.getDescription(contract, server);
@@ -78,14 +78,14 @@ async function solveContract(ns, contract, server) {
     //    //displayContractInfo((ns, contract, type, description, triesRemaining, data));
     //}
 
-    if (solvedTypes.includes(type) && triesRemaining >= 4) {
+    if (solvedTypes.includes(type) && triesRemaining >= 1) {
         //ns.print('\nType: ' + type + '\nNumTriesRemaining: ' + triesRemaining + '\nDescription: ' + description);
         //
 
         // Solve
         switch (type) {
             case "Find Largest Prime Factor":
-                var [solution, result] = tryAttempt(findLargestPrimeFactor, data, server);
+                var [solution, result] = tryAttempt(ns, findLargestPrimeFactor, contract, data, server);
                 displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
                 break;
             case "Unique Paths in a Grid I":
@@ -110,7 +110,7 @@ async function solveContract(ns, contract, server) {
                 ns.print('== TODO - ' + type);
                 break;
             case "Subarray with Maximum Sum":
-                var [solution, result] = tryAttempt(subarrayWithLargestSum, data, server);
+                var [solution, result] = tryAttempt(ns, subarrayWithLargestSum, data, server);
                 displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
                 break;
             case "Find All Valid Math Expressions":
@@ -159,6 +159,8 @@ async function solveContract(ns, contract, server) {
                 ns.print('== NO SOLUTIONS FOR - ' + type);
                 break;
         }
+    } else {
+        ns.print('== CONTRACT BURNED - ' + contract);
     }
 
 }
@@ -206,9 +208,13 @@ function subarrayWithLargestSum(array) {
 }
 
 /** @param 0 array to solve for **/
-function tryAttempt(fn, data, server) {
+function tryAttempt(ns, fn, contract, data, server) {
     var solution = fn(data);
     var result = ns.codingcontract.attempt(solution, contract, server);
-    ns.toast("CONTRACT: " + contract + (result) ? " SOLVED" : " NOT SOLVED");
+
+    var msg = "CONTRACT: " + contract + (result) ? " SOLVED" : " NOT SOLVED"
+    ns.toast(msg);
+    ns.print(msg);
+
     return [solution, result];
 }

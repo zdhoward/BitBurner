@@ -20,7 +20,10 @@ export async function main(ns) {
         } else {
             // Otherwise, hack it
             var loot = await ns.hack(target);
-            ns.toast("Hacked " + target + "\n$" + formatMoney(ns, loot));
+
+            var msg = "Hacked " + target + "\n$" + formatMoney(ns, loot);
+            ns.toast(msg);
+            ns.print(msg);
         }
     }
 }
