@@ -160,7 +160,7 @@ function solveContract(ns, contract, server) {
                 break;
         }
     } else {
-        ns.print('== CONTRACT BURNED - ' + contract);
+        ns.print('== CONTRACT BURNED - ' + contract + ' - ' + type + ' - ' + description + ' - ' + triesRemaining);
     }
 
 }

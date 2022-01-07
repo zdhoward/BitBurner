@@ -82,6 +82,7 @@ export function zfill(num, size) {
  * @return padded string
  */
 export function pad(msg, size) {
+    msg = String(msg);
     while (msg.length < size) msg = msg + ' ';
     return msg;
 }

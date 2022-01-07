@@ -71,7 +71,7 @@ async function deployToBestTargets(ns, bestTargets, hackableServers) {
 function getPayloadAmt(ns, host) {
     var reserveRam = 0;
     if (host == 'home') {
-        reserveRam = 10;
+        reserveRam = 30;
     }
 
     var freeRam = ns.getServerMaxRam(host) - ns.getServerUsedRam(host) - reserveRam;
