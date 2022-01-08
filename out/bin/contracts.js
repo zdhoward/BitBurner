@@ -66,7 +66,7 @@ function displayContractInfo(ns, contract, type, description, triesRemaining, da
  *  @param 1 contract
  */
 function solveContract(ns, contract, server) {
-    var solvedTypes = ["Find Largest Prime Factor", "Subarray with Maximum Sum"];
+    var solvedTypes = ["Find Largest Prime Factor", "Subarray with Maximum Sum", "Generate IP Addresses"];
     var type = ns.codingcontract.getContractType(contract, server);
     var description = ns.codingcontract.getDescription(contract, server);
     var triesRemaining = ns.codingcontract.getNumTriesRemaining(contract, server);
@@ -78,7 +78,7 @@ function solveContract(ns, contract, server) {
     //    //displayContractInfo((ns, contract, type, description, triesRemaining, data));
     //}
 
-    if (solvedTypes.includes(type) && triesRemaining >= 1) {
+    if (solvedTypes.includes(type)) { //&& triesRemaining >= 1) {
         //ns.print('\nType: ' + type + '\nNumTriesRemaining: ' + triesRemaining + '\nDescription: ' + description);
         //
 
@@ -110,7 +110,7 @@ function solveContract(ns, contract, server) {
                 ns.print('== TODO - ' + type);
                 break;
             case "Subarray with Maximum Sum":
-                var [solution, result] = tryAttempt(ns, subarrayWithLargestSum, data, server);
+                var [solution, result] = tryAttempt(ns, subarrayWithLargestSum, contract, data, server);
                 displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
                 break;
             case "Find All Valid Math Expressions":
@@ -137,20 +137,8 @@ function solveContract(ns, contract, server) {
                 ns.print('== TODO - ' + type);
                 break;
             case "Generate IP Addresses":
-                ns.print('== TODO - ' + type);
-                //ns.print('\nType: ' + type + '\nNumTriesRemaining: ' + triesRemaining + '\nDescription: ' + description);
-                /*
-                Description: Given the following string containing only digits, return an array with all possible valid IP address combinations that can be created from the string:
-	
-                2541389340
-	
-                Note that an octet cannot begin with a '0' unless the number itself is actually 0. For example, '192.168.010.1' is not a valid IP.
-	
-                Examples:
-	
-                25525511135 -> [255.255.11.135, 255.255.111.35]
-                1938718066 -> [193.87.180.66]
-                */
+                var [solution, result] = tryAttempt(ns, generateIPs, contract, data, server);
+                displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
                 break;
             case "Spiralize Matrix":
                 ns.print('== TODO - ' + type);
@@ -160,7 +148,7 @@ function solveContract(ns, contract, server) {
                 break;
         }
     } else {
-        ns.print('== CONTRACT BURNED - ' + contract + ' - ' + type + ' - ' + description + ' - ' + triesRemaining);
+        //ns.print('== CONTRACT BURNED - ' + contract + ' - ' + type + ' - ' + description + ' - ' + triesRemaining);
     }
 
 }
@@ -207,12 +195,59 @@ function subarrayWithLargestSum(array) {
     return bestSubArraySum;
 }
 
+/** @param 0 string to solve for **/
+export function generateIPs(input) {
+    function isValidIP(ip) {
+        var passed = true;
+
+        if (ip.length - 3 != input.length) {
+            passed = false;
+        }
+
+        var quads = ip.split('.');
+        quads.forEach(function (quad) {
+            quad = quad.toString();
+            if (quad.startsWith("0") && quad.length > 1) {
+                passed = false;
+            }
+        });
+
+        return passed;
+    }
+
+    var results = [];
+
+    var quads = "";
+
+    // GENERATE ALL COMBINATIONS
+    for (var one = 1; one < 4; one++) {
+        for (var two = one + 1; two < one + 4; two++) {
+            for (var three = two + 1; three < two + 4; three++) {
+                for (var four = three + 1; four < three + 4; four++) {
+                    quads = input.substring(0, one) + "." + input.substring(one, two) + "." + input.substring(two, three) + "." + input.substring(three, four);
+                    if (isValidIP(quads) && !results.includes(quads)) {
+                        results.push(quads);
+                    }
+                }
+            }
+        }
+    }
+
+    return results;
+}
+
 /** @param 0 array to solve for **/
 function tryAttempt(ns, fn, contract, data, server) {
     var solution = fn(data);
     var result = ns.codingcontract.attempt(solution, contract, server);
 
-    var msg = "CONTRACT: " + contract + (result) ? " SOLVED" : " NOT SOLVED"
+    if (!result) {
+        ns.alert('CONTRACT FAILED - ' + contract + ' - ' + type + ' - ' + description + ' - ' + triesRemaining);
+    } else {
+        ns.alert('CONTRACT SOLVED - ' + contract + ' - ' + type + ' - ' + description + ' - ' + triesRemaining);
+    }
+
+    var msg = "CONTRACT: " + String(contract) + String((result) ? " SOLVED" : " NOT SOLVED", 5000);
     ns.toast(msg);
     ns.print(msg);
 

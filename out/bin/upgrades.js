@@ -1,5 +1,4 @@
-import { formatMoney } from '/bin/mastermind-lib.js';
-import { getValidRamAmount } from '/lib/lib.js';
+import { formatMoney, getValidRamAmount } from '/lib/lib.js';
 
 /** @param {NS} ns **/
 export async function main(ns) {

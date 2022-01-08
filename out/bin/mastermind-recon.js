@@ -1,13 +1,12 @@
 import { printBanner, serializeDict } from "/lib/lib.js";
-import { pservPrefixes } from "/lib/config.js";
+import { pservPrefixes, allServers } from "/lib/config.js";
 
 ////////////////////////
 // GLOBALS
 ////////////////////////
 var visited = {};
 //var visitedArr = [];
-
-var allServers = ["n00dles", "foodnstuff", "nectar-net", "neo-net", "comptek", "syscore", "aevum-police", "millenium-fitness", "crush-fitness", "avmnite-02h", "zb-institute", "summit-uni", "I.I.I.I", "rho-construction", "galactic-cyber", "global-pharm", "snap-fitness", "unitalife", "phantasy", "CSEC", "sigma-cosmetics", "joesguns", "zer0", "silver-helix", "netlink", "johnson-ortho", "rothman-uni", "lexo-corp", "alpha-ent", "aerocorp", "omnia", "defcomm", "univ-energy", "taiyang-digital", "run4theh111z", "vitalife", "omnitek", "clarkinc", "zb-def", "deltaone", "icarus", "infocomm", "titan-labs", "helios", "kuai-gong", "powerhouse-fitness", "fulcrumassets", "The-Cave", "microdyne", "fulcrumtech", "solaris", "zeus-med", "nova-med", "applied-energetics", "stormtech", "4sigma", "nwo", ".", "b-and-a", "ecorp", "megacorp", "blade", "omega-net", "the-hub", "catalyst", "hong-fang-tea", "max-hardware", "harakiri-sushi", "iron-gym", "home-contracts", "darkweb"];
+var sortedServers = [];
 
 /** @param {NS} ns 
  */
@@ -16,10 +15,10 @@ export async function main(ns) {
 
     //ns.tprint(visitedArr);
     printBanner(ns, "MASTERMIND - RECON");
-    allServers = sortServers(ns, allServers);
+    sortedServers = sortServers(ns, allServers);
 
-    allServers.forEach(function (server) {
-        if (!ns.hasRootAccess(server)) {
+    sortedServers.forEach(function (server) {
+        if (ns.serverExists(server) && !ns.hasRootAccess(server)) {
             root(ns, server);
         }
     });
@@ -32,8 +31,8 @@ export async function main(ns) {
 
 function getHosts(ns) {
     var hosts = [];
-    allServers.forEach(function (server) {
-        if (!server.startsWith('home') && ns.hasRootAccess(server)) {
+    sortedServers.forEach(function (server) {
+        if (ns.serverExists(server) && !server.startsWith('home') && ns.hasRootAccess(server)) {
             hosts.push(server);
         }
     });
@@ -42,8 +41,8 @@ function getHosts(ns) {
 
 function getTargets(ns) {
     var targets = {};
-    allServers.forEach(function (server) {
-        if (!pservPrefixes.includes(server.split('-')[0]) && ns.hasRootAccess(server) && ns.getServerRequiredHackingLevel(server) <= ns.getHackingLevel()) {
+    sortedServers.forEach(function (server) {
+        if (ns.serverExists(server) && !pservPrefixes.includes(server.split('-')[0]) && ns.hasRootAccess(server) && ns.getServerRequiredHackingLevel(server) <= ns.getHackingLevel()) {
             var maxMoney = ns.getServerMaxMoney(server);
             var hackAmt = ns.hackAnalyze(server);
             var maxThreads = Math.floor(maxMoney / (maxMoney * hackAmt));
@@ -78,7 +77,12 @@ async function serverScanRecursive(ns, hostname) {
 */
 function root(ns, server) {
     openPorts(ns, server);
-    var isRooted = ns.nuke(server);
+    var isRooted;
+    try {
+        isRooted = ns.nuke(server);
+    } catch (e) {
+        isRooted = false;
+    }
     ns.tprint("Server " + server + " is " + (isRooted ? "now " : "not ") + "rooted.");
 }
 

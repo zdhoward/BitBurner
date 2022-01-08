@@ -8,9 +8,14 @@ var searched = {};
 
 /** @param {NS} ns **/
 export async function main(ns) {
+    path = [];
+    searched = {};
+
     var dest = ns.args[0];
-    findPath(ns, ns.getHostname(), dest);
-    ns.tprint("PATH: " + path.reverse().join(" -> "));
+    if (ns.serverExists(dest)) {
+        findPath(ns, ns.getHostname(), dest);
+        ns.tprint("PATH: " + path.reverse().join(" -> "));
+    } else { ns.tprint('ERROR - ' + dest + 'SERVER NAME DOES NOT EXISTS') }
 }
 
 /** @param {NS} ns **/
@@ -32,6 +37,7 @@ function findPath(ns, host, dest) {
         var result = findPath(ns, remoteHost, dest);
         if (result) {
             path.push(host);
+            //ns.tprint('RETURNING: ' + host);
             return host;
         }
     }

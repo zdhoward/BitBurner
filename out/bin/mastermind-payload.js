@@ -22,7 +22,9 @@ export async function main(ns) {
             var loot = await ns.hack(target);
 
             var msg = "Hacked " + target + "\n$" + formatMoney(ns, loot);
-            ns.toast(msg);
+            if (target != 'n00dles') {
+                ns.toast(msg);
+            }
             ns.print(msg);
         }
     }

@@ -1,4 +1,4 @@
-import { formatMoney } from '/bin/mastermind-lib.js'
+import { formatMoney } from '/lib/lib.js'
 
 /** @param {NS} ns **/
 export async function main(ns) {
@@ -6,6 +6,7 @@ export async function main(ns) {
     var reqFiles = ['/bin/contracts.js', '/bin/mastermind-lib.js']
     var server = 'home-contracts';
 
+    ns.scriptKill('/bin/extend-overview.js', 'home');
     ns.run('/bin/extend-overview.js', 1);
 
     // BUY CONTRACT SERVER IF IT DOES NOT EXIST
