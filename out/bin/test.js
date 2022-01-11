@@ -2,6 +2,13 @@ import { generateIPs } from '/bin/contracts.js';
 
 /** @param {NS} ns **/
 export async function main(ns) {
+    var msg = 'Hello World';
+    var payloadInfo = { hostname: 'test-server', msg: 'Hello World' };
+    msg = JSON.stringify(payloadInfo);
+    ns.tryWritePort(20, msg);
+}
+
+function contract_main(ns) {
     var data = '(a)())()'; //'(()()aa(a)()(';
     var validate = ['(a)()()', '(a())()'];
     ns.tprint('DATA: ' + data);

@@ -80,10 +80,10 @@ function root(ns, server) {
     var isRooted;
     try {
         isRooted = ns.nuke(server);
+        s.tprint("Server " + server + " is " + (isRooted ? "now " : "not ") + "rooted.");
     } catch (e) {
         isRooted = false;
     }
-    ns.tprint("Server " + server + " is " + (isRooted ? "now " : "not ") + "rooted.");
 }
 
 /** @param {NS} ns

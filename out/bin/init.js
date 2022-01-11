@@ -34,7 +34,7 @@ async function deployServer(ns, serverName, files) {
         var serverCost = ns.getPurchasedServerCost(ramReq);
         ns.tprint('CONTRACT SERVER REQ: ' + 'RAM - ' + ramReq + ', COST - ' + formatMoney(ns, serverCost) + ', CAN PURCHASE: ' + (money > serverCost) ? 'YES' : 'NO');
         if (money > serverCost) {
-            ns.purchaseServer(server, ramReq);
+            ns.purchaseServer(serverName, ramReq);
         } else { ns.tprint('NOT ENOUGH $$$ ' + formatMoney(ns, money) + '/' + formatMoney(ns, serverCost)); }
     }
 

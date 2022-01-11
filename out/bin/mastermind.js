@@ -11,4 +11,14 @@ export async function main(ns) {
         ns.toast('MASTERMIND ACTIVATED', 'success', 5000);
     }
 
+    // OVERVIEW STATS
+
+    // TOTAL MONEY SINCE LAST AUGMENT
+
+    // # of Servers currently infected
+
+    // Is stocks active? 
+
+    // Is contracts active?
+
 }
