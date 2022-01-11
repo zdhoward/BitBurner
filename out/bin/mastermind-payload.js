@@ -1,31 +1,79 @@
-import { formatMoney } from '/lib/lib.js';
+import { formatMoney, allServers } from '/lib/lib.js';
+//import { allServers } from '/lib/config.js';
 
 /** @param {NS} ns **/
 export async function main(ns) {
-    var target = ns.args[0];
+    ns.disableLog('disableLog');
+    ns.disableLog('weaken');
+    ns.disableLog('grow');
+    ns.disableLog('hack');
+    ns.disableLog('getServerMaxMoney');
+    ns.disableLog('getServerMinSecurityLevel');
+    ns.disableLog('getServerMoneyAvailable');
 
+    var target = ns.args[0];
+    var mode = ns.args[1];
+
+    while (true) {
+        await runPayload(ns, target, mode);
+    }
+}
+
+/** @param {NS} ns **/
+async function runPayload(ns, target, mode) {
     var moneyThresh = ns.getServerMaxMoney(target) * 0.75;
     var securityThresh = ns.getServerMinSecurityLevel(target) + 5;
 
-    while (true) {
-        ns.print("SEC LVL: " + ns.nFormat(ns.getServerSecurityLevel(target), '0,0.00') + " / " + ns.nFormat(securityThresh, '0,0.00'));
-        ns.print("$$ AVAIL: " + ns.nFormat(ns.getServerMoneyAvailable(target), '0,0.00') + " / " + ns.nFormat(moneyThresh, '0,0.00'));
-        if (ns.getServerSecurityLevel(target) > securityThresh) {
-            // If the server's security level is above our threshold, weaken it
-            await ns.weaken(target);
-        } else if (ns.getServerMoneyAvailable(target) < moneyThresh) {
-
-            // If the server's money is less than our threshold, grow it
-            await ns.grow(target);
-        } else {
-            // Otherwise, hack it
-            var loot = await ns.hack(target);
-
-            var msg = "Hacked " + target + "\n$" + formatMoney(ns, loot);
-            if (target != 'n00dles') {
-                ns.toast(msg);
+    switch (mode) {
+        case 'train':
+            ns.print('TRAINING');
+            target = findTrainingTarget(ns);
+        case 'weaken':
+            ns.print('Weakening ' + target + ' in ' + ns.tFormat(ns.getWeakenTime(target)) + ' seconds');
+            var weakened = await ns.weaken(target);
+            ns.print("Weakened " + target + " for " + weakened.toFixed(2));
+            ns.print("SEC LVL: " + ns.getServerSecurityLevel(target).toFixed(2) + " / " + securityThresh.toFixed(2));
+            break;
+        case 'grow':
+            ns.print('Growing ' + target + ' in ' + ns.tFormat(ns.getGrowTime(target)) + ' seconds');
+            var growth = await ns.grow(target);
+            ns.print("Grew " + target + " for " + growth.toFixed(2));
+            ns.print("MONEY: " + formatMoney(ns, ns.getServerMoneyAvailable(target).toFixed(2)) + " / " + formatMoney(ns, ns.getServerMaxMoney(target).toFixed(2)));
+            break;
+        default:
+            if (ns.getServerSecurityLevel(target) > securityThresh) {
+                ns.print('Weakening ' + target + ' in ' + ns.tFormat(ns.getWeakenTime(target)) + ' seconds');
+                var weakened = await ns.weaken(target);
+                ns.print("Weakened " + target + " for " + weakened.toFixed(2));
+                ns.print("SEC LVL: " + ns.getServerSecurityLevel(target).toFixed(2) + " / " + securityThresh.toFixed(2));
+            } else if (ns.getServerMoneyAvailable(target) < moneyThresh) {
+                ns.print('Growing ' + target + ' in ' + ns.tFormat(ns.getGrowTime(target)) + ' seconds');
+                var growth = await ns.grow(target);
+                ns.print("Grew " + target + " for " + growth.toFixed(2));
+                ns.print("MONEY: " + formatMoney(ns, ns.getServerMoneyAvailable(target).toFixed(2)) + " / " + formatMoney(ns, ns.getServerMaxMoney(target).toFixed(2)));
+            } else {
+                ns.print('Hacking ' + target + ' in ' + ns.tFormat(ns.getHackTime(target)) + ' seconds');
+                var loot = await ns.hack(target);
+                ns.print("Hacked " + target + " for $" + formatMoney(ns, loot));
             }
-            ns.print(msg);
-        }
+            break;
     }
+}
+
+/** @param {NS} ns **/
+function findTrainingTarget(ns) {
+    var target = '';
+    var targetValue = 0;
+
+    allServers.forEach(function (server) {
+        if (ns.serverExists(server)) {
+            var analysis = (ns.getHackingLevel() - ns.getServerRequiredHackingLevel(server)) / ns.getHackingLevel();
+            if (analysis > targetValue) {
+                targetValue = analysis;
+                target = server;
+            }
+        }
+    });
+
+    return target;
 }

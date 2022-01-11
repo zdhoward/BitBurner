@@ -66,39 +66,42 @@ function displayContractInfo(ns, contract, type, description, triesRemaining, da
  *  @param 1 contract
  */
 function solveContract(ns, contract, server) {
-    var solvedTypes = ["Find Largest Prime Factor", "Subarray with Maximum Sum", "Generate IP Addresses"];
+    var solvedTypes = ["Find Largest Prime Factor",
+        "Subarray with Maximum Sum",
+        "Generate IP Addresses",
+        "Unique Paths in a Grid I",
+        "Algorithmic Stock Trader I",
+        "Algorithmic Stock Trader II",
+        "Array Jumping Game",
+        "Sanitize Parentheses in Expression"];
     var type = ns.codingcontract.getContractType(contract, server);
     var description = ns.codingcontract.getDescription(contract, server);
     var triesRemaining = ns.codingcontract.getNumTriesRemaining(contract, server);
     var data = ns.codingcontract.getData(contract, server);
 
-    // SOME PROBLEMS HAVE AS LOW AS 1 TRY
-    //if (triesRemaining < 4) {
-    //    ns.print('ERROR - ' + type + ' - triesRemaining = ' + triesRemaining + ' - SOLUTION NEEDS FIXING');
-    //    //displayContractInfo((ns, contract, type, description, triesRemaining, data));
-    //}
+    var result = false;
+
+    ns.print('=========== ' + contract + ' ==========');
+    ns.print('== TYPE            : ' + type);
+    ns.print('== DATA            : ' + data);
 
     if (solvedTypes.includes(type)) { //&& triesRemaining >= 1) {
-        //ns.print('\nType: ' + type + '\nNumTriesRemaining: ' + triesRemaining + '\nDescription: ' + description);
-        //
-
         // Solve
         switch (type) {
             case "Find Largest Prime Factor":
-                var [solution, result] = tryAttempt(ns, findLargestPrimeFactor, contract, data, server);
-                displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
+                result = tryAttempt(ns, findLargestPrimeFactor, contract, data, server);
                 break;
             case "Unique Paths in a Grid I":
-                ns.print('== TODO - ' + type);
+                result = tryAttempt(ns, uniquePathsI, contract, data, server);
                 break;
             case "Unique Paths in a Grid II":
                 ns.print('== TODO - ' + type);
                 break;
             case "Algorithmic Stock Trader I":
-                ns.print('== TODO - ' + type);
+                result = tryAttempt(ns, algorithmicStockTraderI, contract, data, server);
                 break;
             case "Algorithmic Stock Trader II":
-                ns.print('== TODO - ' + type);
+                result = tryAttempt(ns, algorithmicStockTraderII, contract, data, server);
                 break;
             case "Algorithmic Stock Trader III":
                 ns.print('== TODO - ' + type);
@@ -110,10 +113,10 @@ function solveContract(ns, contract, server) {
                 ns.print('== TODO - ' + type);
                 break;
             case "Subarray with Maximum Sum":
-                var [solution, result] = tryAttempt(ns, subarrayWithLargestSum, contract, data, server);
-                displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
+                result = tryAttempt(ns, subarrayWithLargestSum, contract, data, server);
                 break;
             case "Find All Valid Math Expressions":
+                // var data = 466303594639,24
                 //ns.print('\nType: ' + type + '\nNumTriesRemaining: ' + triesRemaining + '\nDescription: ' + description);
                 ns.print('== TODO - ' + type);
                 /*
@@ -134,28 +137,116 @@ function solveContract(ns, contract, server) {
                 */
                 break;
             case "Sanitize Parentheses in Expression":
-                ns.print('== TODO - ' + type);
+                result = tryAttempt(ns, sanitizeParenthesis, contract, data, server);
                 break;
             case "Generate IP Addresses":
-                var [solution, result] = tryAttempt(ns, generateIPs, contract, data, server);
-                displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
+                result = tryAttempt(ns, generateIPs, contract, data, server);
                 break;
             case "Spiralize Matrix":
+                ns.print('== TODO - ' + type);
+                break;
+            case "Merge Overlapping Intervals":
+                // var data = 16,22,15,17,22,26,4,13,4,5,11,19,21,30,21,24,15,18,8,17,20,25,25,35,6,11,24,33
+                ns.print('== TODO - ' + type);
+                break;
+            case "Array Jumping Game":
+                result = tryAttempt(ns, arrayJumpingGame, contract, data, server);
                 ns.print('== TODO - ' + type);
                 break;
             default:
                 ns.print('== NO SOLUTIONS FOR - ' + type);
                 break;
         }
-    } else {
-        //ns.print('== CONTRACT BURNED - ' + contract + ' - ' + type + ' - ' + description + ' - ' + triesRemaining);
     }
-
 }
 
 ////////////////////
 // SOLUTIONS
 ////////////////////
+/** @param 0 array of prices to solve for **/
+function arrayJumpingGame(data) {
+    function jump(idx, maxJump) {
+        if (idx == data.length) {
+            return true;
+        }
+        for (var i = idx + maxJump + 1; i > idx + 1; i--) {
+            if (data[i] != 0) {
+                var result = jump(i, data[i]);
+                if (result) {
+                    //ns.tprint("Current Idx: (" + idx + ') Max Jump: ' + maxJump + ' -> Jump Length: ' + (i - idx));
+                    return result;
+                }
+            }
+        }
+    }
+    var result = jump(0, data[0]) ? 1 : 0;
+    return result
+}
+
+/** @param 0 array of prices to solve for **/
+function algorithmicStockTraderI(data) {
+    var prices = data;
+    var bestProfit = 0;
+    for (var start = 0; start < prices.length; start++) {
+        for (var end = start + 1; end < prices.length; end++) {
+            var profit = prices[end] - prices[start];
+            if (profit > bestProfit) {
+                bestProfit = profit;
+            }
+        }
+    }
+    return bestProfit;
+}
+
+/** @param 0 array of prices to solve for **/
+function algorithmicStockTraderII(data) {
+    var totalProfits = 0;
+    for (var start = 0; start < data.length; start++) {
+        for (var end = start + 1; end < data.length; end++) {
+            var profit = data[end] - data[start];
+            var lastProfit = data[end - 1] - data[start];
+
+            if (profit < lastProfit) {
+                if (lastProfit > 0) {
+                }
+                start = end - 1;
+                totalProfits += lastProfit;
+                break;
+            }
+
+            if (end == data.length - 1) {
+                start = end;
+                totalProfits += profit;
+                break;
+            }
+        }
+    }
+    return totalProfits;
+}
+
+/** @param 0 array of [x,y] to solve for **/
+function uniquePathsI(input) {
+    function findUniquePermutations(path) {
+        if (path.length < 2) return path;
+
+        var permutations = [];
+        for (var i = 0; i < path.length; i++) {
+            var char = path[i];
+            if (path.indexOf(char) != i)
+                continue;
+
+            var remainingString = path.slice(0, i) + path.slice(i + 1, path.length);
+            for (var subPermutation of findUniquePermutations(remainingString)) {
+                permutations.push(char + subPermutation);
+            }
+        }
+        return permutations;
+    }
+
+    var rootPath = "R".repeat(input[0] - 1) + "D".repeat(input[1] - 1);
+    var result = findUniquePermutations(rootPath).length;
+    return result;
+}
 
 /** @param 0 number to solve for **/
 function findLargestPrimeFactor(number) {
@@ -207,6 +298,10 @@ export function generateIPs(input) {
         var quads = ip.split('.');
         quads.forEach(function (quad) {
             quad = quad.toString();
+            if (Number(quad) < 0 || Number(quad) > 255) {
+                passed = false;
+            }
+
             if (quad.startsWith("0") && quad.length > 1) {
                 passed = false;
             }
@@ -238,18 +333,86 @@ export function generateIPs(input) {
 
 /** @param 0 array to solve for **/
 function tryAttempt(ns, fn, contract, data, server) {
+    var type = ns.codingcontract.getContractType(contract, server);
+    var description = ns.codingcontract.getDescription(contract, server);
+    var triesRemaining = ns.codingcontract.getNumTriesRemaining(contract, server);
+    var data = ns.codingcontract.getData(contract, server);
+
     var solution = fn(data);
     var result = ns.codingcontract.attempt(solution, contract, server);
 
     if (!result) {
-        ns.alert('CONTRACT FAILED - ' + contract + ' - ' + type + ' - ' + description + ' - ' + triesRemaining);
+        ns.alert('='.repeat(30) + '\nCONTRACT FAILED\n' + "=".repeat(30) + '\nContract: ' + contract + '\nType: ' + type + '\nTries Remaining: ' + triesRemaining + '\nDescription' + description + '\n\nDATA: ' + data + '\nSOLUTION: ' + solution + '\n' + '='.repeat(30));
     } else {
-        ns.alert('CONTRACT SOLVED - ' + contract + ' - ' + type + ' - ' + description + ' - ' + triesRemaining);
+        ns.alert('='.repeat(30) + '\nCONTRACT SOLVED\n' + "=".repeat(30) + '\nContract: ' + contract + '\nType: ' + type + '\nTries Remaining: ' + triesRemaining + '\nDescription' + description + '\n\nDATA: ' + data + '\nSOLUTION: ' + solution + '\n' + '='.repeat(30));
     }
 
     var msg = "CONTRACT: " + String(contract) + String((result) ? " SOLVED" : " NOT SOLVED", 5000);
     ns.toast(msg);
     ns.print(msg);
 
-    return [solution, result];
+    displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
+
+    return result;
+}
+
+function sanitizeParenthesis(data) {
+    function isParenthesis(char) {
+        return char == '(' || char == ')';
+    }
+
+    function isValid(str) {
+        var cnt = 0;
+
+        for (var i = 0; i < str.length; i++) {
+            if (str[i] == '(')
+                cnt++;
+            else if (str[i] == ')')
+                cnt--;
+            if (cnt < 0)
+                return false;
+        }
+
+        return (cnt == 0);
+    }
+
+    function removeInvalidParenthesis(str) {
+        var results = [];
+        if (str.length == 0)
+            return;
+
+        var visited = new Set();
+
+        var queue = [];
+        var temp;
+        var level = false;
+
+        queue.push(str);
+        visited.add(str);
+
+        while (queue.length != 0) {
+            str = queue.shift();
+            if (isValid(str)) {
+                results.push(str);
+
+                level = true;
+            }
+            if (level)
+                continue;
+            for (var i = 0; i < str.length; i++) {
+                if (!isParenthesis(str[i]))
+                    continue;
+
+                temp = str.substring(0, i) + str.substring(i + 1);
+
+                if (!visited.has(temp)) {
+                    queue.push(temp);
+                    visited.add(temp);
+                }
+            }
+        }
+        return results;
+    }
+
+    return removeInvalidParenthesis(data);
 }

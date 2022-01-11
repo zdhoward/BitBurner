@@ -3,7 +3,7 @@ import { printBanner, deserializeDict, zfill, pad } from '/lib/lib.js';
 ////////////////////////
 // GLOBALS
 ////////////////////////
-var files = ['/bin/mastermind-payload.js', '/lib/lib.js'];
+var files = ['/bin/mastermind-payload.js', '/lib/lib.js', '/lib/config.js'];
 var totalPayloads = 0;
 
 /** @param {NS} ns *
@@ -62,6 +62,30 @@ async function deployToBestTargets(ns, bestTargets, hackableServers) {
             }
         }
     }
+
+    // HACKING IS FULLY SETUP, NOW TIME TO WEAKEN AND GROW ON BEST SERVERS WITH REMAINING THREADS
+    var targets = Object.keys(bestTargets);// deserializeDict(bestTargets).reverse();
+    if (targets.includes("")) {
+        targets.splice(targets.indexOf(""), 1);
+    }
+    var hosts = botnet;
+    hosts.push('home');
+
+    for (var i = 0; i < hosts.length; i++) {
+        var payloadAmt = getPayloadAmt(ns, hosts[i]);
+        payloadAmt = Math.floor(payloadAmt / targets.length);
+        //while (payloadAmt) > 0) {
+        ns.tprint('WARN - ' + hosts[i] + ': has ram left for ' + payloadAmt + ' payloads for each target (' + targets.length + ' targets)');
+        //payloadAmt = Math.floor(payloadAmt / 2);
+        if (payloadAmt > 0) {
+            //deploy(ns, hosts[i], target, payloadAmt, 'reinforce');
+            for (var j = 0; j < targets.length; j++) {
+                //await deploy(ns, hosts[i], targets[j], payloadAmt, 'weaken');
+                //await deploy(ns, hosts[i], targets[j], payloadAmt, 'grow');
+                await deploy(ns, hosts[i], targets[j], payloadAmt, 'train');
+            }
+        }
+    }
 }
 
 /** @param {NS} ns
@@ -97,11 +121,13 @@ function getBotnet(ns) {
  *  @param 1 target
  *  @param 2 payloadAmt
  */
-async function deploy(ns, host, target, payloadAmt) {
+async function deploy(ns, host, target, payloadAmt, mode = 'normal') {
     await ns.scp(files, 'home', host);
     if (payloadAmt > 0) {
-        await ns.exec('/bin/mastermind-payload.js', host, payloadAmt, target);
-        ns.tprint('INFO - ' + 'PAYLOAD: ' + '(' + zfill(payloadAmt, 5) + ')\t' + pad(host, 18) + '->\t' + target);
+        await ns.exec('/bin/mastermind-payload.js', host, payloadAmt, target, mode);
+        if (mode == 'normal') {
+            ns.tprint('INFO - ' + 'PAYLOAD [' + mode + ']: (' + zfill(payloadAmt, 5) + ')\t' + pad(host, 18) + '->\t' + target);
+        }
         totalPayloads += payloadAmt;
     } else {
         ns.tprint('WARN - ' + host + ' has no ram to run scripts from');

@@ -1,52 +1,73 @@
+import { generateIPs } from '/bin/contracts.js';
+
 /** @param {NS} ns **/
 export async function main(ns) {
-    var input = "25525511135";
-    var result = generateIPs(ns, input);
-    result.forEach(function (r) {
-        ns.tprint(r);
-    });
+    var data = '(a)())()'; //'(()()aa(a)()(';
+    var validate = ['(a)()()', '(a())()'];
+    ns.tprint('DATA: ' + data);
+    var result = sanitizeParenthesis(data);
+    ns.tprint('RESULT: ' + result);
+    ns.tprint("VALIDATE: " + validate);
 }
 
-export function generateIPs(ns, input) {
-    function isValidIP(ip) {
-        var passed = true;
-
-        ns.tprint("COMPARING: " + input.length + " AND " + (ip.length - 3));
-        if (ip.length - 3 != input.length) {
-            passed = false;
-        }
-
-
-        var quads = ip.split('.');
-        quads.forEach(function (quad) {
-            quad = quad.toString();
-            if (quad.startsWith("0") && quad.length > 1) {
-                ns.tprint('RETURNING FALSE');
-                passed = false;
-            }
-        });
-
-        ns.tprint("Valid IP: " + ip);
-        return passed;
+function sanitizeParenthesis(data) {
+    function isParenthesis(char) {
+        return char == '(' || char == ')';
     }
 
-    var results = [];
+    function isValid(str) {
+        var cnt = 0;
 
-    var quads = "";
+        for (var i = 0; i < str.length; i++) {
+            if (str[i] == '(')
+                cnt++;
+            else if (str[i] == ')')
+                cnt--;
+            if (cnt < 0)
+                return false;
+        }
 
-    // GENERATE ALL COMBINATIONS
-    for (var one = 1; one < 4; one++) {
-        for (var two = one + 1; two < one + 4; two++) {
-            for (var three = two + 1; three < two + 4; three++) {
-                for (var four = three + 1; four < three + 4; four++) {
-                    quads = input.substring(0, one) + "." + input.substring(one, two) + "." + input.substring(two, three) + "." + input.substring(three, four);
-                    if (isValidIP(quads) && !results.includes(quads)) {
-                        results.push(quads);
-                    }
+        return (cnt == 0);
+    }
+
+    function removeInvalidParenthesis(str) {
+        var results = [];
+        if (str.length == 0)
+            return;
+
+        var visited = new Set();
+
+        var queue = [];
+        var temp;
+        var level = false;
+
+        queue.push(str);
+        visited.add(str);
+
+        while (queue.length != 0) {
+            str = queue.shift();
+            if (isValid(str)) {
+                //ns.tprint('VALID: ' + str);
+                results.push(str);
+
+                level = true;
+            }
+            if (level)
+                continue;
+            for (var i = 0; i < str.length; i++) {
+                if (!isParenthesis(str[i]))
+                    continue;
+
+                temp = str.substring(0, i) + str.substring(i + 1);
+
+                if (!visited.has(temp)) {
+                    queue.push(temp);
+                    visited.add(temp);
                 }
             }
         }
+        return results;
     }
 
-    return results;
+    return removeInvalidParenthesis(data);
 }

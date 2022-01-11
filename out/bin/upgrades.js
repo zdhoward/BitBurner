@@ -2,22 +2,24 @@ import { formatMoney, getValidRamAmount } from '/lib/lib.js';
 
 /** @param {NS} ns **/
 export async function main(ns) {
-    ns.toast("upgrades.js is starting");
+    ns.toast("upgrades.js is starting", 'success', 5000);
 
+    while (true) {
+        ////// SETUP NEW ATTACK BOTS
+        purchaseNewAttackBot(ns);
 
-    ////// SETUP NEW ATTACK BOTS
-    purchaseNewAttackBot(ns);
-
-    // Upgrade Home PC
-    //ns.getUpgradeHomeCoresCost();
-    //ns.getUpgradeHomeRamCost();
-    //ns.upgradeHomeCores();
-    //ns.upgradeHomeRam();
+        // Upgrade Home PC
+        //ns.getUpgradeHomeCoresCost();
+        //ns.getUpgradeHomeRamCost();
+        //ns.upgradeHomeCores();
+        //ns.upgradeHomeRam();
+        await ns.sleep(6000);
+    }
 }
 
 /** @param {NS} ns **/
 function purchaseNewAttackBot(ns) {
-    if (ns.getPurchasedServers().length < ns.getPurchasedServerLimit()) {
+    if (ns.getPurchasedServers().length < ns.getPurchasedServerLimit() && ns.getPlayer().money > 75000000000) {
         var ramSize = getNewServerSize(ns, ns.getPurchasedServerMaxRam(), ns.getPlayer().money);
         var cost = ns.getPurchasedServerCost(ramSize);
 
@@ -25,8 +27,8 @@ function purchaseNewAttackBot(ns) {
 
 
         if (ns.purchaseServer(name, ramSize)) {
-            ns.tprint('INFO - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(ns, cost));
-        } else { ns.tprint('ERROR - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(ns, cost)); }
+            ns.print('INFO - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(ns, cost));
+        } else { ns.print('ERROR - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(ns, cost)); }
     }
 }
 

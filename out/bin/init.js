@@ -2,17 +2,29 @@ import { formatMoney } from '/lib/lib.js'
 
 /** @param {NS} ns **/
 export async function main(ns) {
-    var money = ns.getPlayer().money;
-    var reqFiles = ['/bin/contracts.js', '/bin/mastermind-lib.js']
-    var server = 'home-contracts';
 
+    ns.tprint('RUNNING: /bin/extend-overview.js on home');
     ns.scriptKill('/bin/extend-overview.js', 'home');
     ns.run('/bin/extend-overview.js', 1);
 
+    ns.tprint('RUNNING: /bin/upgrades.js on home');
+    ns.scriptKill('/bin/upgrades.js', 'home');
+    ns.run('/bin/upgrades.js', 1);
+    //// HOME-CONTRACTS
     // BUY CONTRACT SERVER IF IT DOES NOT EXIST
-    if (!ns.serverExists(server)) {
-        ns.tprint('BUYING HOME-CONTRACTS SERVER');
-        var ramReq = Math.ceil(ns.getScriptRam('/bin/contracts.js', 'home'));
+    await deployServer(ns, 'home-contracts', ['/bin/contracts.js', '/lib/lib.js']);
+
+    if (ns.getPlayer().money > 10000000000) {
+        await deployServer(ns, 'home-stocks', ['/bin/stocks.js', '/lib/lib.js']);
+    }
+
+}
+
+async function deployServer(ns, serverName, files) {
+    var money = ns.getPlayer().money;
+    if (!ns.serverExists(serverName)) {
+        ns.tprint('BUYING ' + serverName + ' SERVER');
+        var ramReq = Math.ceil(ns.getScriptRam(files[0], 'home'));
 
         // snap to nearest exponent of 2	
         ramReq = (ramReq >= 64) ? 128 : ramReq;
@@ -26,14 +38,14 @@ export async function main(ns) {
         } else { ns.tprint('NOT ENOUGH $$$ ' + formatMoney(ns, money) + '/' + formatMoney(ns, serverCost)); }
     }
 
-    if (ns.serverExists(server)) {
+    if (ns.serverExists(serverName)) {
         // LOAD FILES
-        ns.tprint('LOADING FILES ONTO HOME-CONTRACTS');
-        await ns.killall(server);
-        await ns.scp(reqFiles, 'home', server);
+        ns.tprint('LOADING FILES ONTO ' + serverName);
+        await ns.killall(serverName);
+        await ns.scp(files, 'home', serverName);
 
         // RUN FILES
-        ns.tprint('EXECUTING ' + reqFiles[0]);
-        await ns.exec(reqFiles[0], server, 1);
-    } else { ns.tprint('HOME-CONTRACTS SERVER DOES NOT EXIST'); }
+        ns.tprint('EXECUTING ' + files[0]);
+        await ns.exec(files[0], serverName, 1);
+    } else { ns.tprint(serverName + ' SERVER DOES NOT EXIST'); }
 }
