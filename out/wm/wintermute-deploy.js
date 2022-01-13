@@ -58,6 +58,29 @@ async function deployToTargets(ns, hosts, targets) {
     }
 
     // distribute all remaining available payloads from hosts to targets as evenly as possible starting from biggest servers to smallest
+    // HACKING IS FULLY SETUP, NOW TIME TO WEAKEN AND GROW ON BEST SERVERS WITH REMAINING THREADS
+    targets = Object.keys(targets);// deserializeDict(bestTargets).reverse();
+    if (targets.includes("")) {
+        targets.splice(targets.indexOf(""), 1);
+    }
+    var hosts = botnet;
+    hosts.push('home');
+
+    for (var i = 0; i < hosts.length; i++) {
+        var payloadAmt = getPayloadAmt(ns, hosts[i]);
+        payloadAmt = Math.floor(payloadAmt / targets.length);
+        //while (payloadAmt) > 0) {
+        ns.tprint('WARN - ' + hosts[i] + ': has ram left for ' + payloadAmt + ' payloads for each target (' + targets.length + ' targets)');
+        //payloadAmt = Math.floor(payloadAmt / 2);
+        if (payloadAmt > 0) {
+            //deploy(ns, hosts[i], target, payloadAmt, 'reinforce');
+            for (var j = 0; j < targets.length; j++) {
+                //await deploy(ns, hosts[i], targets[j], payloadAmt, 'weaken');
+                //await deploy(ns, hosts[i], targets[j], payloadAmt, 'grow');
+                await deploy(ns, hosts[i], targets[j], payloadAmt, 'train');
+            }
+        }
+    }
 }
 
 /** @param {import("../../.").NS } ns **/
