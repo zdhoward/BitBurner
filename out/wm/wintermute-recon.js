@@ -1,34 +1,52 @@
-import { printBanner, serializeDict, allServers } from "/lib/lib.js";
-import { pservPrefixes } from "/lib/config.js";
+import { printBanner, serializeDict, pservPrefixes } from '/lib/lib.js';
 
 ////////////////////////
 // GLOBALS
 ////////////////////////
 var visited = {};
-//var visitedArr = [];
 var sortedServers = [];
 
-/** @param {NS} ns 
- */
-export async function main(ns) {
-    //await serverScanRecursive(ns, ns.getHostname());
 
-    //ns.tprint(visitedArr);
-    printBanner(ns, "MASTERMIND - RECON");
+/** @param {import("../../.").NS } ns **/
+export async function main(ns) {
+    ns.disableLog('ALL');
+
+    printBanner(ns, 'WINTERMUTE - RECON');
+
+    ns.tprint('Scanning for servers...');
+    await serverScanRecursive(ns, ns.getHostname());
+    var allServers = Object.keys(visited);
+
+    ns.tprint('Sorting servers...');
     sortedServers = sortServers(ns, allServers);
 
+    ns.tprint('Rooting Servers...');
     sortedServers.forEach(function (server) {
         if (ns.serverExists(server) && !ns.hasRootAccess(server)) {
             root(ns, server);
         }
     });
 
+    ns.tprint('Finding Hosts...');
     var hosts = getHosts(ns);
-    var targets = serializeDict(getTargets(ns));
 
-    ns.run('/bin/mastermind-deploy.js', 1, targets, hosts.toString());
+    ns.tprint('Finding Targets...');
+    var targets = serializeDict(getTargets(ns));
+    if (ns.args[0]) {
+        var specificTarget = ns.args[0];
+        targets = serializeDict({ [specificTarget]: Infinity });
+        ns.tprint('Specific Target: ' + specificTarget);
+    }
+
+    ns.tprint('Starting Deployment...');
+    if (ns.getScriptRam('/wm/wintermute-deploy.js') < ns.getServerMaxRam('home') - ns.getServerUsedRam('home')) {
+        ns.run('/wm/wintermute-deploy.js', 1, targets, hosts.toString());
+    } else {
+        ns.tprint('Not enough RAM to activate /wm/wintermute-deploy.js');
+    }
 }
 
+/** @param {import("../../.").NS } ns **/
 function getHosts(ns) {
     var hosts = [];
     sortedServers.forEach(function (server) {
@@ -39,10 +57,11 @@ function getHosts(ns) {
     return hosts;
 }
 
+/** @param {import("../../.").NS } ns **/
 function getTargets(ns) {
     var targets = {};
     sortedServers.forEach(function (server) {
-        if (ns.serverExists(server) && !pservPrefixes.includes(server.split('-')[0]) && ns.hasRootAccess(server) && ns.getServerRequiredHackingLevel(server) <= ns.getHackingLevel()) {
+        if (ns.serverExists(server) && !pservPrefixes.includes(server.split('-')[0]) && ns.getServerRequiredHackingLevel(server) <= ns.getHackingLevel()) {
             var maxMoney = ns.getServerMaxMoney(server);
             var hackAmt = ns.hackAnalyze(server);
             var maxThreads = Math.floor(maxMoney / (maxMoney * hackAmt));
@@ -54,27 +73,7 @@ function getTargets(ns) {
     return targets;
 }
 
-/** @param {NS} ns
-*  @param 0 hostname
-*/
-async function serverScanRecursive(ns, hostname) {
-    if (visited[hostname] == true) {
-        return;
-    }
-
-    visited[hostname] = true;
-    //visitedArr.push(hostname);
-
-    var remoteHosts = ns.scan(hostname);
-    for (var i in remoteHosts) {
-        var remoteHost = remoteHosts[i];
-        if (ns.serverExists(remoteHost)) {
-            await serverScanRecursive(ns, remoteHost);
-        }
-    }
-}
-
-/** @param {NS} ns
+/** @param {import("../../.").NS } ns
 *  @param 0 server
 */
 function root(ns, server) {
@@ -82,13 +81,15 @@ function root(ns, server) {
     var isRooted;
     try {
         isRooted = ns.nuke(server);
-        s.tprint("Server " + server + " is " + (isRooted ? "now " : "not ") + "rooted.");
+        if (isRooted) {
+            s.tprint("== Server " + server + " is now rooted.");
+        }
     } catch (e) {
         isRooted = false;
     }
 }
 
-/** @param {NS} ns
+/** @param {import("../../.").NS } ns
  *  @param 0 hostname
  */
 export function openPorts(ns, hostname) {
@@ -105,6 +106,9 @@ export function openPorts(ns, hostname) {
     });
 }
 
+/** @param {import("../../.").NS } ns
+ *  @param 0 servers
+ */
 function sortServers(ns, servers) {
     var sortedTargets = servers.sort(function (a, b) {
         if (ns.getServerMaxMoney(a) > ns.getServerMaxMoney(b)) {
@@ -113,4 +117,23 @@ function sortServers(ns, servers) {
     });
 
     return sortedTargets;
+}
+
+/** @param {import("../../.").NS } ns
+*   @param 0 hostname
+*/
+async function serverScanRecursive(ns, hostname) {
+    if (visited[hostname] == true) {
+        return;
+    }
+
+    visited[hostname] = true;
+
+    var remoteHosts = ns.scan(hostname);
+    for (var i in remoteHosts) {
+        var remoteHost = remoteHosts[i];
+        if (ns.serverExists(remoteHost)) {
+            await serverScanRecursive(ns, remoteHost);
+        }
+    }
 }

@@ -3,7 +3,7 @@ import { printBanner, deserializeDict, zfill, pad } from '/lib/lib.js';
 ////////////////////////
 // GLOBALS
 ////////////////////////
-var files = ['/bin/mastermind-payload.js', '/lib/lib.js', '/lib/config.js'];
+var files = ['/bin/mastermind-payload.js', '/lib/lib.js', '/utils/travel.js', '/utils/server-info.js'];
 var totalPayloads = 0;
 
 /** @param {NS} ns *
@@ -28,6 +28,8 @@ async function deployToBestTargets(ns, bestTargets, hackableServers) {
     var botnet = getBotnet(ns);
     hackableServers = hackableServers.concat(botnet);
     hackableServers.push('home');
+
+    bestTargets = { 'joesguns': Infinity };
 
     // KILL ALL SCRPITS BEFORE CALCULATIONS BELOW
     for (var i = 0; i < hackableServers.length; i++) {
@@ -95,7 +97,7 @@ async function deployToBestTargets(ns, bestTargets, hackableServers) {
 function getPayloadAmt(ns, host) {
     var reserveRam = 0;
     if (host == 'home') {
-        reserveRam = 64;
+        reserveRam = 10; // TODO: needs to scale better (no augments needs very low amounts)
     }
 
     var freeRam = ns.getServerMaxRam(host) - ns.getServerUsedRam(host) - reserveRam;

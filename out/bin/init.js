@@ -3,19 +3,27 @@ import { formatMoney } from '/lib/lib.js'
 /** @param {NS} ns **/
 export async function main(ns) {
 
-    ns.tprint('RUNNING: /bin/extend-overview.js on home');
-    ns.scriptKill('/bin/extend-overview.js', 'home');
-    ns.run('/bin/extend-overview.js', 1);
+    ns.tprint('RUNNING: /bin/mastermind-monitor.js on home');
+    ns.scriptKill('/bin/mastermind-monitor.js', 'home');
+    ns.run('/bin/mastermind-monitor.js', 1);
+
+    //ns.tprint('RUNNING: /bin/extend-overview.js on home');
+    //ns.scriptKill('/bin/extend-overview.js', 'home');
+    //ns.run('/bin/extend-overview.js', 1);
+
+    ns.tprint('RUNNING: /bin/extend-status-overlay.js on home');
+    ns.scriptKill('/bin/extend-status-overlay.js', 'home');
+    ns.run('/bin/extend-status-overlay.js', 1);
 
     ns.tprint('RUNNING: /bin/upgrades.js on home');
     ns.scriptKill('/bin/upgrades.js', 'home');
     ns.run('/bin/upgrades.js', 1);
     //// HOME-CONTRACTS
     // BUY CONTRACT SERVER IF IT DOES NOT EXIST
-    await deployServer(ns, 'home-contracts', ['/bin/contracts.js', '/lib/lib.js']);
+    await deployServer(ns, 'home-contracts', ['/bin/contracts.js', '/lib/lib.js', '/bin/work.js', '/bin/stocks.js', '/bin/hacknet.js', '/bin/upgrades.js', '/bin/extend-status-overlay.js']);
 
     if (ns.getPlayer().money > 10000000000) {
-        await deployServer(ns, 'home-stocks', ['/bin/stocks.js', '/lib/lib.js']);
+        //await deployServer(ns, 'home-stocks', ['/bin/stocks.js', '/lib/lib.js']);
     }
 
 }
@@ -31,8 +39,10 @@ async function deployServer(ns, serverName, files) {
         ramReq = (ramReq >= 32) ? 64 : ramReq;
         ramReq = (ramReq >= 16) ? 32 : ramReq;
 
+        ramReq = 128;
+
         var serverCost = ns.getPurchasedServerCost(ramReq);
-        ns.tprint('CONTRACT SERVER REQ: ' + 'RAM - ' + ramReq + ', COST - ' + formatMoney(ns, serverCost) + ', CAN PURCHASE: ' + (money > serverCost) ? 'YES' : 'NO');
+        ns.tprint(serverName + ' SERVER REQ: ' + 'RAM - ' + ramReq + ', COST - ' + formatMoney(ns, serverCost) + ', CAN PURCHASE: ' + (money > serverCost) ? 'YES' : 'NO');
         if (money > serverCost) {
             ns.purchaseServer(serverName, ramReq);
         } else { ns.tprint('NOT ENOUGH $$$ ' + formatMoney(ns, money) + '/' + formatMoney(ns, serverCost)); }

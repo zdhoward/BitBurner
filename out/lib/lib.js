@@ -1,8 +1,26 @@
-export var allServers = ["n00dles", "foodnstuff", "nectar-net", "neo-net", "comptek", "syscore", "aevum-police", "millenium-fitness", "crush-fitness", "avmnite-02h", "zb-institute", "summit-uni", "I.I.I.I", "rho-construction", "galactic-cyber", "global-pharm", "snap-fitness", "unitalife", "phantasy", "CSEC", "sigma-cosmetics", "joesguns", "zer0", "silver-helix", "netlink", "johnson-ortho", "rothman-uni", "lexo-corp", "alpha-ent", "aerocorp", "omnia", "defcomm", "univ-energy", "taiyang-digital", "run4theh111z", "vitalife", "omnitek", "clarkinc", "zb-def", "deltaone", "icarus", "infocomm", "titan-labs", "helios", "kuai-gong", "powerhouse-fitness", "fulcrumassets", "The-Cave", "microdyne", "fulcrumtech", "solaris", "zeus-med", "nova-med", "applied-energetics", "stormtech", "4sigma", "nwo", ".", "b-and-a", "ecorp", "megacorp", "blade", "omega-net", "the-hub", "catalyst", "hong-fang-tea", "max-hardware", "harakiri-sushi", "iron-gym", "darkweb"];
+export var allServers = ["ecorp", "megacorp", "b-and-a", "blade", "nwo", "clarkinc", "omnitek", "4sigma",
+    "kuai-gong", "fulcrumtech", "fulcrumassets", "stormtech", "defcomm", "infocomm", "helios", "vitalife",
+    "icarus", "univ-energy", "titan-labs", "microdyne", "taiyang-digital", "galactic-cyber", "aerocorp",
+    "omnia", "zb-def", "applied-energetics", "solaris", "deltaone", "global-pharm", "nova-med", "zeus-med",
+    "unitalife", "lexo-corp", "rho-construction", "alpha-ent", "aevum-police", "rothman-uni",
+    "zb-institute", "summit-uni", "syscore", "catalyst", "the-hub", "comptek", "netlink", "johnson-ortho",
+    "n00dles", "foodnstuff", "sigma-cosmetics", "joesguns", "zer0", "nectar-net", "neo-net",
+    "silver-helix", "hong-fang-tea", "harakiri-sushi", "phantasy", "max-hardware", "omega-net",
+    "crush-fitness", "iron-gym", "millenium-fitness", "powerhouse-fitness", "snap-fitness",
+    "run4theh111z", "I.I.I.I", "avmnite-02h", ".", "CSEC", "The-Cave", "w0r1d_d43m0n"]
+
+export var pservPrefixes = ['BOT', 'home'];
+
+//["n00dles", "foodnstuff", "nectar-net", "neo-net", "comptek", "syscore", "aevum-police", "millenium-fitness", "crush-fitness", "avmnite-02h", "zb-institute", "summit-uni", "I.I.I.I", "rho-construction", "galactic-cyber", "global-pharm", "snap-fitness", "unitalife", "phantasy", "CSEC", "sigma-cosmetics", "joesguns", "zer0", "silver-helix", "netlink", "johnson-ortho", "rothman-uni", "lexo-corp", "alpha-ent", "aerocorp", "omnia", "defcomm", "univ-energy", "taiyang-digital", "run4theh111z", "vitalife", "omnitek", "clarkinc", "zb-def", "deltaone", "icarus", "infocomm", "titan-labs", "helios", "kuai-gong", "powerhouse-fitness", "fulcrumassets", "The-Cave", "microdyne", "fulcrumtech", "solaris", "zeus-med", "nova-med", "applied-energetics", "stormtech", "4sigma", "nwo", ".", "b-and-a", "ecorp", "megacorp", "blade", "omega-net", "the-hub", "catalyst", "hong-fang-tea", "max-hardware", "harakiri-sushi", "iron-gym", "darkweb"];
 
 export var MASTERMIND_PORT = 20;
 
-/** @param {NS} ns 
+/** @param {import("../../.").NS } ns */
+export function main(ns) {
+
+}
+
+/** @param {import("../../.").NS } ns
  *  @param 0 ram
  *  @return validRamAmount
  */
@@ -16,7 +34,7 @@ export function getValidRamAmount(ns, ram) {
     return ram;
 }
 
-/** @param {NS} ns 
+/** @param {import("../../.").NS } ns
  *  @param 0 msg
  *  @return formattedMsg
  */
@@ -24,7 +42,7 @@ export async function printBanner(ns, msg) {
     ns.tprint('\n============================================================' + '\n==\t\t' + msg + '\n============================================================');
 }
 
-/** @param {NS} ns
+/** @param {import("../../.").NS } ns
  *  @param 0 money
  *  @return formattedMoney
  */
@@ -89,4 +107,19 @@ export function pad(msg, size) {
     msg = String(msg);
     while (msg.length < size) msg = msg + ' ';
     return msg;
+}
+
+/** @param {import("../../.").NS } ns **/
+export async function runRemoteScript(ns, script, server = 'home') {
+    await ns.scriptKill(script, server);
+    if (server != 'home') {
+        await ns.scp(script, 'home', server);
+    }
+    if (ns.getScriptRam(script, 'home') < ns.getServerMaxRam(server) - ns.getServerUsedRam(server)) {
+        ns.exec(script, server);
+    } else {
+        ns.tprint('Not enough RAM to activate ' + script);
+    }
+
+    //await ns.sleep(10);
 }

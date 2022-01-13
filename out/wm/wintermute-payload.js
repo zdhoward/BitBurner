@@ -22,5 +22,8 @@
 
 /** @param {NS} ns **/
 export async function main(ns) {
+    //ns.disableLog('ALL');
+    ns.tprint('WINTERMUTE PAYLOAD: ' + ns.getHostname());
+
 
 }

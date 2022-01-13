@@ -58,6 +58,7 @@ function displayContractInfo(ns, contract, type, description, triesRemaining, da
     ns.print('== DATA            :' + data);
     ns.print('== SOLUTION: ' + solution);
     ns.print('== ATTEMPTED CONTRACT: [' + contract + ']: ' + result);
+    ns.print("== REWARD: " + result);
     ns.print('==============================');
 }
 
@@ -72,8 +73,11 @@ function solveContract(ns, contract, server) {
         "Unique Paths in a Grid I",
         "Algorithmic Stock Trader I",
         "Algorithmic Stock Trader II",
+        //"Algorithmic Stock Trader III",
         "Array Jumping Game",
-        "Sanitize Parentheses in Expression"];
+        "Sanitize Parentheses in Expression",
+        "Spiralize Matrix"
+    ];
     var type = ns.codingcontract.getContractType(contract, server);
     var description = ns.codingcontract.getDescription(contract, server);
     var triesRemaining = ns.codingcontract.getNumTriesRemaining(contract, server);
@@ -104,18 +108,21 @@ function solveContract(ns, contract, server) {
                 result = tryAttempt(ns, algorithmicStockTraderII, contract, data, server);
                 break;
             case "Algorithmic Stock Trader III":
-                ns.print('== TODO - ' + type);
+                result = tryAttempt(ns, algorithmicStockTraderIII, contract, data, server);
                 break;
             case "Algorithmic Stock Trader IV":
+                // var data = 7,55,139,173,185,81,12,59,40,97,154,20,170,17,57,40,148,118,43,39
                 ns.print('== TODO - ' + type);
                 break;
             case "Minimum Path Sum in a Triangle":
+                // var data = 9,5,4,8,9,5,4,5,6,8,8,7,8,7,4
                 ns.print('== TODO - ' + type);
                 break;
             case "Subarray with Maximum Sum":
                 result = tryAttempt(ns, subarrayWithLargestSum, contract, data, server);
                 break;
             case "Find All Valid Math Expressions":
+                // var data = 8327,82
                 // var data = 466303594639,24
                 //ns.print('\nType: ' + type + '\nNumTriesRemaining: ' + triesRemaining + '\nDescription: ' + description);
                 ns.print('== TODO - ' + type);
@@ -143,6 +150,7 @@ function solveContract(ns, contract, server) {
                 result = tryAttempt(ns, generateIPs, contract, data, server);
                 break;
             case "Spiralize Matrix":
+                result = tryAttempt(ns, spiralizeMatrix, contract, data, server);
                 ns.print('== TODO - ' + type);
                 break;
             case "Merge Overlapping Intervals":
@@ -163,6 +171,40 @@ function solveContract(ns, contract, server) {
 ////////////////////
 // SOLUTIONS
 ////////////////////
+/** @param 0 array of numbers to solve for **/
+function spiralizeMatrix(data) {
+    var spiralized = [];
+    var direction = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+    var curDir = 0;
+
+    var curX = 0;
+    var curY = 0;
+
+    var offset = 0;
+
+    for (var y = 0; y < data.length; y++) {
+        for (var x = 0; x < data[y].length; x++) {
+            spiralized.push(data[curY][curX]);
+
+            if (curDir == 0 && curX == data[y].length - 1 - offset) {
+                curDir++;
+            } else if (curDir == 1 && curY == data.length - 1 - offset) {
+                curDir++;
+            } else if (curDir == 2 && curX == 0 + offset) {
+                curDir++;
+                offset++;
+            } else if (curDir == 3 && curY == 0 + offset) {
+                curDir = 0;
+            }
+
+            curX += direction[curDir][0];
+            curY += direction[curDir][1];
+        }
+    }
+
+    return spiralized;
+}
+
 /** @param 0 array of prices to solve for **/
 function arrayJumpingGame(data) {
     function jump(idx, maxJump) {
@@ -222,6 +264,14 @@ function algorithmicStockTraderII(data) {
         }
     }
     return totalProfits;
+}
+
+/** @param 0 array of prices to solve for **/
+function algorithmicStockTraderIII(data) {
+    var transactions = algorithmicStockSolver(data);
+    var bestProfit = data[transactions[0][1]] - data[transactions[0][0]];
+    bestProfit += data[transactions[1][1]] - data[transactions[1][0]];
+    return bestProfit
 }
 
 /** @param 0 array of [x,y] to solve for **/

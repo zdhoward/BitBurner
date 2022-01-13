@@ -1,13 +1,15 @@
-import { formatMoney, } from '/lib/lib.js';
-import { allServers } from '/lib/config.js';
+import { formatMoney, allServers } from '/lib/lib.js';
+
+const doc = eval("document"); // This is expensive! (25GB RAM) Perhaps there's a way around it? ;)
+const hook0 = doc.getElementById('overview-extra-hook-0');
+const hook1 = doc.getElementById('overview-extra-hook-1');
+const hook2 = doc.getElementById('overview-extra-hook-2');
+
+let container = new StatusContainer(doc)
+let statusbar = new StatusBarText(doc, { divId: "WorkStatus", container })
 
 /** @param {NS} ns **/
 export async function main(ns) {
-    const doc = document; // This is expensive! (25GB RAM) Perhaps there's a way around it? ;)
-    const hook0 = doc.getElementById('overview-extra-hook-0');
-    const hook1 = doc.getElementById('overview-extra-hook-1');
-    const hook2 = doc.getElementById('overview-extra-hook-2');
-
     while (true) {
         try {
             const headers = []

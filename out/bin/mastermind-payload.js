@@ -1,4 +1,4 @@
-import { formatMoney, allServers } from '/lib/lib.js';
+import { formatMoney, allServers, MASTERMIND_PORT } from '/lib/lib.js';
 //import { allServers } from '/lib/config.js';
 
 /** @param {NS} ns **/
@@ -55,6 +55,8 @@ async function runPayload(ns, target, mode) {
                 ns.print('Hacking ' + target + ' in ' + ns.tFormat(ns.getHackTime(target)) + ' seconds');
                 var loot = await ns.hack(target);
                 ns.print("Hacked " + target + " for $" + formatMoney(ns, loot));
+                var monitorMsg = JSON.stringify({ name: ns.getHostname(), loot: loot });
+                ns.tryWritePort(MASTERMIND_PORT, monitorMsg);
             }
             break;
     }

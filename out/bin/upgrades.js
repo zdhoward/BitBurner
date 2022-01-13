@@ -5,6 +5,12 @@ export async function main(ns) {
     ns.toast("upgrades.js is starting", 'success', 5000);
 
     while (true) {
+        // Buy TOR
+        purchaseFromDarkweb(ns);
+
+        // Upgrade PC
+        upgradeHome(ns);
+
         ////// SETUP NEW ATTACK BOTS
         purchaseNewAttackBot(ns);
 
@@ -15,6 +21,30 @@ export async function main(ns) {
         //ns.upgradeHomeRam();
         await ns.sleep(6000);
     }
+}
+
+function purchaseFromDarkweb(ns) {
+    var money = ns.getPlayer().money;
+
+    if (!ns.serverExists("darkweb") && money > 200000) {
+        ns.purchaseTor();
+    }
+}
+
+function upgradeHome(ns) {
+    var money = ns.getPlayer().money;
+
+    // RAM
+    if (money > ns.getUpgradeHomeRamCost()) {
+        ns.upgradeHomeRam();
+        money -= ns.getUpgradeHomeRamCost();
+    }
+
+    if (money > ns.getUpgradeHomeCoresCost()) {
+        ns.upgradeHomeCores();
+        money -= ns.getUpgradeHomeCoresCost();
+    }
+
 }
 
 /** @param {NS} ns **/
