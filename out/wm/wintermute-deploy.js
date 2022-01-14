@@ -1,4 +1,4 @@
-import { printBanner, deserializeDict, zfill, pad } from '/lib/lib.js';
+import { printBanner, deserializeDict, zfill, pad, waitRandom, getBotnet } from '/lib/lib.js';
 
 //var targets;
 //var hosts;
@@ -6,12 +6,17 @@ import { printBanner, deserializeDict, zfill, pad } from '/lib/lib.js';
 var PAYLOAD = '/bin/mastermind-payload.js';
 var totalPayloads = 0;
 
+var files = ['/bin/mastermind-payload.js', '/lib/lib.js'];
+
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
     ns.disableLog('ALL');
     printBanner(ns, 'WINTERMUTE - DEPLOY');
 
+    totalPayloads = 0;
+
     var targets = deserializeDict(ns.args[0]);
+    targets['n00dles'] = 100; /// OVERRIDE TO DEDICATE LESS RESOURCES TO n00dles
     var hosts = ns.args[1].split(',');
 
     await deployToTargets(ns, hosts, targets);
@@ -41,11 +46,13 @@ async function deployToTargets(ns, hosts, targets) {
                     if (payloadAmt <= targets[server]) {
                         targets[server] -= payloadAmt;
                         await deploy(ns, hosts[i], server, payloadAmt);
+                        await waitRandom(ns, 1000, 500);
                         fullyAssignedServers.push(hosts[i]);
                         payloadAmt = 0;
                     } else if (payloadAmt > targets[server]) {
                         payloadAmt -= targets[server];
                         await deploy(ns, hosts[i], server, targets[server]);
+                        await waitRandom(ns, 1000, 500);
                         targets[server] = 0;
                     }
 
@@ -78,22 +85,13 @@ async function deployToTargets(ns, hosts, targets) {
                 //await deploy(ns, hosts[i], targets[j], payloadAmt, 'weaken');
                 //await deploy(ns, hosts[i], targets[j], payloadAmt, 'grow');
                 await deploy(ns, hosts[i], targets[j], payloadAmt, 'train');
+                await waitRandom(ns, 1000, 500);
             }
         }
     }
 }
 
-/** @param {import("../../.").NS } ns **/
-function getBotnet(ns) {
-    var purchasedServers = ns.getPurchasedServers();
-    var botnet = [];
-    for (var i = 0; i < purchasedServers.length; i++) {
-        if (purchasedServers[i].startsWith('BOT')) {
-            botnet.push(purchasedServers[i]);
-        }
-    }
-    return botnet;
-}
+
 
 /** @param {import("../../.").NS } ns
  *  @param 0 host
@@ -101,7 +99,7 @@ function getBotnet(ns) {
  *  @param 2 payloadAmt
  */
 async function deploy(ns, host, target, payloadAmt, mode = 'normal') {
-    //await ns.scp(files, 'home', host);
+    await ns.scp(files, 'home', host);
     if (payloadAmt > 0) {
         await ns.exec(PAYLOAD, host, payloadAmt, target, mode);
         if (mode == 'normal') {

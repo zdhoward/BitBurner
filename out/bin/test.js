@@ -6,11 +6,22 @@ import { generateIPs } from '/bin/contracts.js';
 /** @param {NS} ns **/
 export async function main(ns) {
     //contract_main(ns);
-    var data = [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0];
+    var data = 88;
     ns.tprint('DATA     : ' + data);
-    var result = '';
+    var result = totalWaysToSum(ns, data);
     ns.tprint('RESULT   : ' + result);
 
+}
+
+function totalWaysToSum(ns, data) {
+    var totalWays = 0;
+
+    // find all permutation of numbers that add up to data
+    for (var i = 1; i < data; i++) {
+
+    }
+
+    return totalWays
 }
 
 function uniquePathsII(ns, data) {

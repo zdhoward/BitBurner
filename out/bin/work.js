@@ -23,7 +23,7 @@ export async function main(ns) {
 /** @param {import("../../.").NS } ns **/
 function tryCreateProgram(ns) {
     if (!ns.isBusy()) {
-        ns.tprint("Trying To Create Programs...");
+        ns.print("Trying To Create Programs...");
 
         var hackingLvl = ns.getHackingLevel();
 
@@ -43,12 +43,15 @@ async function tryWorkFactions(ns) {
     var player = ns.getPlayer();
     var invitations = ns.checkFactionInvitations();
 
+    /*
+    // JOIN FACTIONS
     for (var i = 0; i < invitations.length; i++) {
         if (!factionsToNotAcceptImmediately.includes(invitations[i])) {
             ns.tprint("Joining Faction: " + invitations[i]);
             ns.joinFaction(invitations[i]);
         }
     }
+    */
 
     if (!ns.isBusy()) {
         var factions = player.factions;
@@ -62,7 +65,7 @@ async function tryWorkFactions(ns) {
             //ns.tprint(factions[i] + ' Rep Goal: ' + repGoal);
             if (factionRep < repGoal) {
                 var workType = 'Hacking Contracts';
-                ns.tprint("Trying To Work For Faction: " + factions[i] + ' - ' + formatMoney(ns, factionRep) + "/" + formatMoney(ns, repGoal));
+                ns.print("Trying To Work For Faction: " + factions[i] + ' - ' + formatMoney(ns, factionRep) + "/" + formatMoney(ns, repGoal));
                 ns.workForFaction(factions[i], workType, false);
                 await ns.sleep(1000 * 60 * 10); // 2 mins
                 ns.stopAction();
@@ -79,7 +82,7 @@ function getRepGoal(ns, faction) {
 
     var highestRep = 0;
     for (var i = 0; i < augs.length; i++) {
-        if (!ownedAugs.includes(augs[i])) {
+        if (!ownedAugs.includes(augs[i]) && !augs[i].startsWith('NeuroFlux Governor')) {
             var cost = ns.getAugmentationRepReq(augs[i]);
             if (cost > highestRep) {
                 highestRep = cost;
@@ -96,7 +99,7 @@ async function tryWork(ns) {
         // if no factions, and have stats, start working at blade and then fulcrum
         // if have factions, work on gaining faction rep with ones that have good augments to buy
         //   gain as much rep as the most costly augment with them
-        ns.tprint("Trying To Work...");
+        ns.print("Trying To Work...");
         ns.workForCompany('joesguns');
 
         var player = ns.getPlayer();
@@ -107,7 +110,7 @@ async function tryWork(ns) {
 
         var hasJob = false;
         Object.keys(jobs).forEach(function (key) {
-            ns.tprint(key + ': ' + jobs[key]);
+            ns.print(key + ': ' + jobs[key]);
             if (key == "Joe's Guns" && jobs[key] == 'Employee') {
                 hasJob = true;
             }
@@ -120,7 +123,7 @@ async function tryWork(ns) {
         }
 
         if (hasJob) {
-            ns.tprint("Trying To Work For Company: Joe's Guns");
+            ns.print("Trying To Work For Company: Joe's Guns");
             ns.workForCompany("Joe's Guns", false);
             await ns.sleep(1000 * 60 * 10);
             ns.stopAction();

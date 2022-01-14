@@ -1,4 +1,4 @@
-import { allServers } from '/lib/lib.js';
+import { allServers, getBotnet } from '/lib/lib.js';
 import { StatusContainer } from "/ui/StatusContainer.js";
 import { StatusBarText, StatusBarProgress } from "/ui/StatusBar.js";
 
@@ -47,6 +47,18 @@ export async function main(ns) {
         return [memUsed, memMax]
     }
 
+    function bfree() {
+        const hosts = getBotnet(ns);
+
+        let memUsed = 0, memMax = 0
+        hosts.forEach(hn => {
+            memUsed += ns.getServerUsedRam(hn)
+            memMax += ns.getServerMaxRam(hn)
+        })
+
+        return [memUsed, memMax]
+    }
+
     function countContracts() {
         const hosts = HOSTNAMES.filter(hn => ns.serverExists(hn)).filter(hn => ns.hasRootAccess(hn))
         const contracts = [].concat.apply([], hosts.map(hn => ns.ls(hn, '.cct')))
@@ -81,6 +93,8 @@ export async function main(ns) {
         hlev: new StatusBarProgress(doc, { container, labelText: 'targets' }),//, clickHandler: () => ns.run("/tools/peers.js"), barColor: '#273061' }),
         home: new StatusBarProgress(doc, { container, labelText: 'home' }),
         gmem: new StatusBarProgress(doc, { container, labelText: 'global' }),
+        bmem: new StatusBarProgress(doc, { container, labelText: 'botnet' }),
+        ram: new StatusBarText(doc, { container, labelText: 'RAM' }),
         exes: new StatusBarText(doc, { container, labelText: 'EXEs' }),
         cont: new StatusBarText(doc, { container, labelText: 'Contracts' }), //, clickHandler: () => ns.run("contract-hunter.js", 1, "--solve", "ALL") }),
         totalIncome: new StatusBarText(doc, { container, labelText: 'Total' }),
@@ -103,8 +117,11 @@ export async function main(ns) {
         // Memory
         let [hused, hmax] = [ns.getServerUsedRam('home'), ns.getServerMaxRam('home')]
         let [gused, gmax] = gfree()
+        let [bused, bmax] = bfree()
         bars.home.progress = hused / hmax
         bars.gmem.progress = gused / gmax
+        bars.bmem.progress = bused / bmax
+        bars.ram.rlabel = (hmax + gmax + bmax) + 'GB'
 
         // Unlockers
         if ((iteration % 100) == 0) {

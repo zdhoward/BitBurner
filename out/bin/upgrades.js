@@ -1,6 +1,6 @@
 import { formatMoney, getValidRamAmount } from '/lib/lib.js';
 
-/** @param {NS} ns **/
+/** @param {import("../../.").NS } ns **/
 export async function main(ns) {
     ns.toast("upgrades.js is starting", 'success', 5000);
 
@@ -23,14 +23,54 @@ export async function main(ns) {
     }
 }
 
+/** @param {import("../../.").NS } ns **/
 function purchaseFromDarkweb(ns) {
     var money = ns.getPlayer().money;
 
     if (!ns.serverExists("darkweb") && money > 200000) {
         ns.purchaseTor();
     }
+
+    if (ns.serverExists("darkweb")) {
+        if (!ns.fileExists('BruteSSH.exe', 'home')) {
+            if (money > 1000000 * 3) {
+                ns.purchaseDarkweb('SQLInject.exe');
+            }
+        }
+        if (!ns.fileExists('relaySMTP.exe', 'home')) {
+            if (money > 5000000 * 3) {
+                ns.purchaseDarkweb('SQLInject.exe');
+            }
+        }
+        if (!ns.fileExists('HTTPWorm.exe', 'home')) {
+            if (money > 30000000 * 3) {
+                ns.purchaseDarkweb('HTTPWorm.exe');
+            }
+        }
+        if (!ns.fileExists('SQLInject.exe', 'home')) {
+            if (money > 250000000 * 3) {
+                ns.purchaseDarkweb('SQLInject.exe');
+            }
+        }
+        if (!ns.fileExists('AutoLink.exe', 'home')) {
+            if (money > 1000000 * 3) {
+                ns.purchaseDarkweb('AutoLink.exe');
+            }
+        }
+        if (!ns.fileExists('DeepscanV1.exe', 'home')) {
+            if (money > 500000 * 3) {
+                ns.purchaseDarkweb('DeepscanV1.exe');
+            }
+        }
+        if (!ns.fileExists('DeepscanV2.exe', 'home')) {
+            if (money > 25000000 * 3) {
+                ns.purchaseDarkweb('DeepscanV1.exe');
+            }
+        }
+    }
 }
 
+/** @param {import("../../.").NS } ns **/
 function upgradeHome(ns) {
     var money = ns.getPlayer().money;
 
@@ -47,7 +87,7 @@ function upgradeHome(ns) {
 
 }
 
-/** @param {NS} ns **/
+/** @param {import("../../.").NS } ns **/
 function purchaseNewAttackBot(ns) {
     if (ns.getPurchasedServers().length < ns.getPurchasedServerLimit() && ns.getPlayer().money > 75000000000) {
         var ramSize = getNewServerSize(ns, ns.getPurchasedServerMaxRam(), ns.getPlayer().money);
@@ -62,7 +102,7 @@ function purchaseNewAttackBot(ns) {
     }
 }
 
-/** @param {NS} ns 
+/** @param {import("../../.").NS } ns 
  *  @param 0 ramSize
  *  @return max purchasable ramSize
  */
@@ -75,7 +115,7 @@ function getNewServerSize(ns, ramSize, money) {
     return ramSize
 }
 
-/** @param {NS} ns 
+/** @param {import("../../.").NS } ns 
  *  @param 0 name
  *  @return name with unique number
  */

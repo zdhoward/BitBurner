@@ -35,7 +35,8 @@ export async function main(ns) {
     await init(ns, filesToDeploy);
 
     // Status Overlay seems to only run on home
-    await ns.run('/bin/extend-status-overlay.js');
+    //await ns.run('/bin/extend-status-overlay.js');
+    await runRemoteScript(ns, '/bin/extend-status-overlay.js', 'home');
 
     // RUN RECON
     await ns.run('/wm/wintermute-recon.js', 1, specificTarget);
@@ -43,6 +44,8 @@ export async function main(ns) {
 
 async function init(ns, filesToDeploy) {
     printBanner(ns, 'WINTERMUTE - INIT');
+
+    specificTarget = '';
 
     if (ns.args[0]) {
         specificTarget = ns.args[0];

@@ -20,6 +20,24 @@ export function main(ns) {
 
 }
 
+/** @param {import("../../.").NS } ns */
+export async function waitRandom(ns, time, offset) {
+    // To help stagger commands in loops
+    await ns.sleep(Math.floor(Math.random() * time) + offset);
+}
+
+/** @param {import("../../.").NS } ns **/
+export function getBotnet(ns) {
+    var purchasedServers = ns.getPurchasedServers();
+    var botnet = [];
+    for (var i = 0; i < purchasedServers.length; i++) {
+        if (purchasedServers[i].startsWith('BOT')) {
+            botnet.push(purchasedServers[i]);
+        }
+    }
+    return botnet;
+}
+
 /** @param {import("../../.").NS } ns
  *  @param 0 ram
  *  @return validRamAmount

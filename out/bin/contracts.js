@@ -161,6 +161,10 @@ function solveContract(ns, contract, server) {
                 result = tryAttempt(ns, arrayJumpingGame, contract, data, server);
                 ns.print('== TODO - ' + type);
                 break;
+            case "Total Ways to Sum":
+                // var data = 88
+                ns.print('== TODO - ' + type);
+                break;
             default:
                 ns.print('== NO SOLUTIONS FOR - ' + type);
                 break;

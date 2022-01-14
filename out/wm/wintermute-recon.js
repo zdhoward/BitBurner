@@ -13,6 +13,9 @@ export async function main(ns) {
 
     printBanner(ns, 'WINTERMUTE - RECON');
 
+    visited = {};
+    sortedServers = [];
+
     ns.tprint('Scanning for servers...');
     await serverScanRecursive(ns, ns.getHostname());
     var allServers = Object.keys(visited);
