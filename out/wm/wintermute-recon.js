@@ -47,6 +47,8 @@ export async function main(ns) {
     } else {
         ns.tprint('Not enough RAM to activate /wm/wintermute-deploy.js');
     }
+
+    ns.tprint("COMPLETE");
 }
 
 /** @param {import("../../.").NS } ns **/

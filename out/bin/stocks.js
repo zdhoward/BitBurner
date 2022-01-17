@@ -80,11 +80,12 @@ async function startStockTrader(ns) {
         var playerMoney = ns.getServerMoneyAvailable('home');
 
         if (forecast >= stockBuyPer && volPer <= stockVolPer) {
-            if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock, minSharePer, "Long")) {
+            if (playerMoney - moneyKeep > Math.max(ns.stock.getPurchaseCost(stock, minSharePer, "Long"), 1e9 + moneyKeep)) {
                 var shares = Math.min((playerMoney - moneyKeep - 100000) / askPrice, maxShares);
                 ns.stock.buy(stock, shares);
                 //ns.print('Bought: '+ stock + '')
                 ns.toast('Bought: ' + stock + ' x ' + formatMoney(ns, shares) + ' for $' + formatMoney(ns, askPrice * shares), 'info', 5000);
+                ns.alert('Bought: ' + stock + ' x ' + formatMoney(ns, shares) + ' for $' + formatMoney(ns, askPrice * shares), 'info', 5000);
             }
         }
     }
@@ -96,7 +97,8 @@ async function startStockTrader(ns) {
         if (forecast < 0.5 || profit < -10000000) {
             ns.stock.sell(stock, position[0]);
             //ns.print('Sold: '+ stock + '')
-            ns.toast('Sold: ' + stock + '', 'info', 5000);
+            ns.toast('Sold: ' + stock + ' for $' + formatMoney(ns, profit), 'info', 5000);
+            ns.alert('Sold: ' + stock + ' for $' + formatMoney(ns, profit), 'info', 5000);
         }
     }
 }

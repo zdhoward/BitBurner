@@ -34,12 +34,16 @@ export async function main(ns) {
     var filesToDeploy = ['/lib/lib.js', '/bin/work.js', '/bin/contracts.js', '/bin/upgrades.js', 'stocks.js']; // '/bin/extend-status-overlay.js', '/ui/Base.js', '/ui/StatusBar.js', '/ui/StatusContainer.js',
     await init(ns, filesToDeploy);
 
+    //await ns.scriptKill('/bin/mastermind-payload.js', 'home');
+
     // Status Overlay seems to only run on home
     //await ns.run('/bin/extend-status-overlay.js');
     await runRemoteScript(ns, '/bin/extend-status-overlay.js', 'home');
 
     // RUN RECON
     await ns.run('/wm/wintermute-recon.js', 1, specificTarget);
+
+    ns.tprint("COMPLETE");
 }
 
 /** @param {import("../../.").NS } ns **/

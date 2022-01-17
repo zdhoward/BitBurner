@@ -20,6 +20,8 @@ export async function main(ns) {
     var hosts = ns.args[1].split(',');
 
     await deployToTargets(ns, hosts, targets);
+
+    ns.tprint("COMPLETE");
 }
 
 /** @param {import("../../.").NS } ns **/
@@ -38,6 +40,7 @@ async function deployToTargets(ns, hosts, targets) {
         }
     }
 
+    ns.tprint("Deploying " + PAYLOAD + " to " + hosts.length + " hosts...");
     for (var server in targets) {
         if (ns.serverExists(server)) {
             for (var i = 0; i < hosts.length; i++) {
@@ -73,11 +76,13 @@ async function deployToTargets(ns, hosts, targets) {
     var hosts = botnet;
     hosts.push('home');
 
+    ns.tprint("Distributing remaining payloads in train mode...");
+
     for (var i = 0; i < hosts.length; i++) {
         var payloadAmt = getPayloadAmt(ns, hosts[i]);
         payloadAmt = Math.floor(payloadAmt / targets.length);
         //while (payloadAmt) > 0) {
-        ns.tprint('WARN - ' + hosts[i] + ': has ram left for ' + payloadAmt + ' payloads for each target (' + targets.length + ' targets)');
+        //ns.tprint('WARN - ' + hosts[i] + ': has ram left for ' + payloadAmt + ' payloads for each target (' + targets.length + ' targets)');
         //payloadAmt = Math.floor(payloadAmt / 2);
         if (payloadAmt > 0) {
             //deploy(ns, hosts[i], target, payloadAmt, 'reinforce');
@@ -103,12 +108,13 @@ async function deploy(ns, host, target, payloadAmt, mode = 'normal') {
     if (payloadAmt > 0) {
         await ns.exec(PAYLOAD, host, payloadAmt, target, mode);
         //if (mode == 'normal') {
-        ns.tprint('INFO - ' + 'PAYLOAD [' + mode + ']: (' + zfill(payloadAmt, 5) + ')\t' + pad(host, 18) + '->\t' + target);
+        //ns.tprint('INFO - ' + 'PAYLOAD [' + mode + ']: (' + zfill(payloadAmt, 5) + ')\t' + pad(host, 18) + '->\t' + target);
         //}
         totalPayloads += payloadAmt;
     } else {
         ns.tprint('WARN - ' + host + ' has no ram to run scripts from');
     }
+    return payloadAmt;
 }
 
 /** @param {import("../../.").NS } ns

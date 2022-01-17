@@ -116,8 +116,8 @@ export async function main(ns) {
         home: new StatusBarProgress(doc, { container, labelText: 'home' }),
         gmem: new StatusBarProgress(doc, { container, labelText: 'remotes' }),
         bmem: new StatusBarProgress(doc, { container, labelText: 'botnet' }),
-        amem: new StatusBarProgress(doc, { container, labelText: 'all' }),
-        ram: new StatusBarText(doc, { container, labelText: 'RAM' }),
+        //amem: new StatusBarProgress(doc, { container, labelText: 'all' }),
+        ram: new StatusBarProgress(doc, { container, labelText: 'RAM' }),//new StatusBarText(doc, { container, labelText: 'RAM' }),
         exes: new StatusBarText(doc, { container, labelText: 'EXEs' }),
         cont: new StatusBarText(doc, { container, labelText: 'Contracts' }), //, clickHandler: () => ns.run("contract-hunter.js", 1, "--solve", "ALL") }),
         totalIncome: new StatusBarText(doc, { container, labelText: 'Total' }),
@@ -145,8 +145,8 @@ export async function main(ns) {
         bars.home.progress = hused / hmax
         bars.gmem.progress = gused / gmax
         bars.bmem.progress = bused / bmax
-        bars.amem.progress = aused / amax
-        bars.ram.rlabel = shorten(hmax + gmax + bmax, ' GB')
+        bars.ram.progress = aused / amax
+        bars.ram.rlabel = shorten(hmax + gmax + bmax, ' GB', { precision: 0, sep: '', div: 1000 })
 
         // Unlockers
         if ((iteration % 100) == 0) {
@@ -168,7 +168,7 @@ export async function main(ns) {
         bars.totalIncome.rlabel = shorten(incomeSinceReset * (ns.getTimeSinceLastAug() / 1000))
         bars.income.rlabel = shorten(incomePerSecond, '/sec')
         bars.xpgain.rlabel = shorten(experiencePerSecond, '/sec')
-        bars.karma.rlabel = ns.heart.break();
+        bars.karma.rlabel = ns.heart.break()
 
         // Important: this must be asleep and not sleep if we want our clickHandlers to work.
         await ns.asleep(500)
