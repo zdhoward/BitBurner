@@ -1,3 +1,4 @@
+import { waitRandom } from '/lib/lib';
 import { formatMoney, allServers, MASTERMIND_PORT } from '/lib/lib.js';
 //import { allServers } from '/lib/config.js';
 
@@ -10,6 +11,8 @@ export async function main(ns) {
     ns.disableLog('getServerMaxMoney');
     ns.disableLog('getServerMinSecurityLevel');
     ns.disableLog('getServerMoneyAvailable');
+
+    await waitRandom(ns, 30, 0);
 
     var target = ns.args[0];
     var mode = ns.args[1];

@@ -3,27 +3,37 @@ import { generateIPs } from '/bin/contracts.js';
 // 2,7,0,0,7,9,2,0,1,1 <-- fails
 
 
-/** @param {NS} ns **/
+/** @param {import("../../.").NS } ns **/
 export async function main(ns) {
     //contract_main(ns);
-    var data = 88;
-    ns.tprint('DATA     : ' + data);
-    var result = totalWaysToSum(ns, data);
-    ns.tprint('RESULT   : ' + result);
+    //var data = [130, 85, 165, 128, 38, 173, 79, 194, 187, 93, 136, 16, 9, 165, 72, 104, 25, 137, 152, 139, 107, 105, 10, 41, 37, 163, 11];
+    //ns.tprint('DATA     : ' + data);
+    //var result = algorithmicStockSolver(ns, data, Infinity);
+    //ns.tprint('RESULT   : ' + result);
 
+    // Acquire a reference to the terminal list of lines.
+    //const list = ;
+
+    var liClass = "jss1414 MuiListItem-root MuiListItem-gutters MuiListItem-padding css-1sslzpn";
+    var pClass = "jss1419 MuiTypography-root MuiTypography-body1 css-12bw0zz";
+
+    var html = '<li class="' + liClass + '"><p class="' + pClass + '"><b>HELLO</b> <i>HELLO</i> <u>HELLO</u>, HELLO</p></li>';
+
+    liClass = "jss1414 MuiListItem-root MuiListItem-gutters MuiListItem-padding css-1sslzpn";
+    var aClass = "MuiTypography-root MuiTypography-inherit jss1415 MuiLink-root MuiLink-underlineAlways css-qu79bi";
+    pClass = "MuiTypography-root MuiTypography-body1 css-12bw0zz";
+
+    var linkedHTML = '<li class="' + liClass + '"><a class="' + aClass + '"<p class="' + pClass + '">n00dles</p></li>';
+
+    // Inject some HTML.
+    document.getElementById("terminal").insertAdjacentHTML('beforeend', linkedHTML);
+
+    //ns.tprint(html);
 }
 
-function totalWaysToSum(ns, data) {
-    var totalWays = 0;
+////////////////////////////////////////////////////////////////////////////////
 
-    // find all permutation of numbers that add up to data
-    for (var i = 1; i < data; i++) {
-
-    }
-
-    return totalWays
-}
-
+/** @param {import("../../.").NS } ns **/
 function uniquePathsII(ns, data) {
 
 }
@@ -65,46 +75,47 @@ function contract_stocks(ns) {
     //ns.tprint("VALIDATE : " + validate);
 }
 
-function algorithmicStockSolver(data) {
+function algorithmicStockSolver(ns, data, numOfTx) {
     // return an array of transactions sorted most profitable to least
-    var transactions = [];
+    // Needs to prep to solve 4 different questions
+    // 1. Find the profit from single best transaction in the series of prices
+    // 2. Get maximum profit from as many transactions as possible
+    // 3. Get the best profit from 2 transactions
+    // 4. Get best profit from a variable amount of transactions
+    //
+    // algorithmicStockSolver(data, numOfTx)
+    //   return bestProfit;
 
-    for (var start = 0; start < data.length; start++) {
-        for (var end = start + 1; end < data.length; end++) {
-            var profit = data[end] - data[start];
-            var lastProfit = data[end - 1] - data[start];
+    if (numOfTx == Infinity)
+        numOfTx = Math.ceil(data.length / 2);
 
-            if (profit < lastProfit) {
-                if (lastProfit > 0) {
+    function solve(_start = 0, depth = 0) {
+        ns.tprint('PARAMS: ' + _start + ' ' + depth);
+        var bestProfit = 0;
+        var bestProfitEnd = 0;
+        for (var start = _start; start < data.length - 1; start++) {
+            //ns.tprint('START: ' + start);
+            for (var end = start + 1; end < data.length; end++) {
+                //ns.tprint('END: ' + end);
+                var profit = data[end] - data[start];
+                if (profit > bestProfit) {
+                    bestProfit = profit;
+                    bestProfitEnd = end;
+                    ns.tprint('START: ' + start + ' END: ' + end);
                 }
-
-                if (start != end - 1)
-                    transactions.push([start, end - 1]);
-                start = end - 1;
-                break;
             }
+        }
 
-            if (end == data.length - 1) {
-                if (start != end)
-                    transactions.push([start, end]);
-                start = end;
-                break;
-            }
+        ns.tprint("depth: " + depth + " numOfTx: " + numOfTx + " bestProfit: " + bestProfit + " bestProfitEnd: " + bestProfitEnd);
+        if (depth < numOfTx - 1) {
+            return bestProfit + solve(bestProfitEnd + 1, depth + 1);
+        } else {
+            return bestProfit;
         }
     }
 
-    transactions.sort(function (a, b) {
-        var profitA = data[a[1]] - data[a[0]];
-        var profitB = data[b[1]] - data[b[0]];
-        if (profitA > profitB)
-            return -1;
-        else if (profitA < profitB)
-            return 1;
-        else
-            return 0;
-    });
+    return solve();
 
-    return transactions;
 }
 
 /** @param 0 array of prices to solve for **/

@@ -76,6 +76,8 @@ function solveContract(ns, contract, server) {
         //"Algorithmic Stock Trader III",
         "Array Jumping Game",
         "Sanitize Parentheses in Expression",
+        "Total Ways to Sum",
+        "Merge Overlapping Intervals",
         "Spiralize Matrix"
     ];
     var type = ns.codingcontract.getContractType(contract, server);
@@ -155,15 +157,14 @@ function solveContract(ns, contract, server) {
                 break;
             case "Merge Overlapping Intervals":
                 // var data = 16,22,15,17,22,26,4,13,4,5,11,19,21,30,21,24,15,18,8,17,20,25,25,35,6,11,24,33
-                ns.print('== TODO - ' + type);
+                result = tryAttempt(ns, mergeOverlappingIntervals, contract, data, server);
                 break;
             case "Array Jumping Game":
                 result = tryAttempt(ns, arrayJumpingGame, contract, data, server);
                 ns.print('== TODO - ' + type);
                 break;
             case "Total Ways to Sum":
-                // var data = 88
-                ns.print('== TODO - ' + type);
+                result = tryAttempt(ns, totalWaysToSum, contract, data, server);
                 break;
             default:
                 ns.print('== NO SOLUTIONS FOR - ' + type);
@@ -175,6 +176,91 @@ function solveContract(ns, contract, server) {
 ////////////////////
 // SOLUTIONS
 ////////////////////
+/** @param data number to solve for 
+ */
+function mergeOverlappingIntervals(data) {
+    function isValid(items) {
+        var success = true;
+        for (var i = 0; i < items.length; i++) {
+            for (var j = 0; j < items.length; j++) {
+                if (i != j) {
+                    var iStart = items[i][0];
+                    var iEnd = items[i][1];
+                    var jStart = items[j][0];
+                    var jEnd = items[j][1];
+
+                    if (iStart <= jStart && iEnd >= jStart) {
+                        success = false;
+                    }
+                }
+            }
+        }
+        return success;
+    }
+
+    function merge(items, index = 0) {
+        var mergedRun = items[index];
+        var toRemove = [];
+        for (var i = index + 1; i < items.length; i++) {
+            var mStart = mergedRun[0];
+            var mEnd = mergedRun[1];
+            var dStart = items[i][0];
+            var dEnd = items[i][1];
+
+            if (mStart <= dStart && mEnd >= dStart) {
+                items.splice(i, 1);
+                i--;
+                mergedRun[1] = Math.max(mEnd, dEnd);
+            }
+
+        }
+        items[index] = mergedRun;
+
+        if (!isValid(items)) {
+            items = merge(items, index + 1);
+        }
+
+        return items;
+    }
+
+    data = data.sort(function (a, b) {
+        if (a[0] > b[0])
+            return 1;
+        else if (a[0] < b[0])
+            return -1;
+        else
+            return 0;
+    });
+
+    data = merge(data);
+
+    return data;
+}
+
+/** @param {import("../../.").NS } ns 
+ *  @param data number to solve for 
+ */
+function totalWaysToSum(data) {
+    function breakdown(number, range) {
+        var steps = Array.from({ length: number + 1 }, (_, i) => 0);
+        steps[0] = 1;
+
+        for (var row = 1; row < range + 1; row++) {
+            for (var col = 1; col < number + 1; col++) {
+                if (col >= row) {
+                    steps[col] = steps[col] + steps[col - row];
+                }
+            }
+        }
+
+        return steps[number];
+    }
+
+    var totalWays = breakdown(data, data - 1);
+
+    return totalWays
+}
+
 /** @param 0 array of numbers to solve for **/
 function spiralizeMatrix(data) {
     var spiralized = [];

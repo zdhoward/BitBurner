@@ -46,6 +46,7 @@ function printLine(ns, tx, price, volatility, forecast, qty, shares, avgPaid, sh
     ns.print(pad('[ ' + tx + ' ]', 9) + '│ ' + pad(price, 12) + '│ ' + pad(volatility, 12) + '│ ' + pad(forecast, 12) + '│ ' + pad(qty, 7) + '│ │ ' + pad(shares, 9) + '│ ' + pad(avgPaid, 12) + '│ ' + pad(shorts, 9) + '│ ' + pad(avgPaidShorts, 12) + '│ ' + pad(profits, 9));
 }
 
+/** @param {import("../../.").NS } ns **/
 async function startStockTrader(ns) {
     var maxSharePer = 1.00
     var stockBuyPer = 0.60
@@ -68,8 +69,9 @@ async function startStockTrader(ns) {
         }
         ns.print('Cycle Complete');
         await ns.sleep(6000);
-        await printStockStatus(ns);
+        //await printStockStatus(ns);
     }
+
     function buyPositions(stock) {
         var maxShares = (ns.stock.getMaxShares(stock) * maxSharePer) - position[0];
         var askPrice = ns.stock.getAskPrice(stock);
@@ -86,12 +88,23 @@ async function startStockTrader(ns) {
             }
         }
     }
+
     function sellPositions(stock) {
         var forecast = ns.stock.getForecast(stock);
-        if (forecast < 0.5) {
+        var position = ns.stock.getPosition(stock);
+        var profit = ns.stock.getSaleGain(stock, position[0], 'long');
+        if (forecast < 0.5 || profit < -10000000) {
             ns.stock.sell(stock, position[0]);
             //ns.print('Sold: '+ stock + '')
             ns.toast('Sold: ' + stock + '', 'info', 5000);
         }
     }
 }
+
+// newStockTrader
+//  wallstreet kid
+
+// BUY as much as possible of best forcasted stock
+//   repeat until down to $1,000,000
+// profit = (price - avgPaid) * shares  - txCost
+// SELL if (forecast<0.5 ||  profit < -10000000)

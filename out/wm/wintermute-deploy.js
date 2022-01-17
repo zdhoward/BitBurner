@@ -46,13 +46,13 @@ async function deployToTargets(ns, hosts, targets) {
                     if (payloadAmt <= targets[server]) {
                         targets[server] -= payloadAmt;
                         await deploy(ns, hosts[i], server, payloadAmt);
-                        await waitRandom(ns, 1000, 500);
+                        //await waitRandom(ns, 1000, 500);
                         fullyAssignedServers.push(hosts[i]);
                         payloadAmt = 0;
                     } else if (payloadAmt > targets[server]) {
                         payloadAmt -= targets[server];
                         await deploy(ns, hosts[i], server, targets[server]);
-                        await waitRandom(ns, 1000, 500);
+                        //await waitRandom(ns, 1000, 500);
                         targets[server] = 0;
                     }
 
@@ -85,7 +85,7 @@ async function deployToTargets(ns, hosts, targets) {
                 //await deploy(ns, hosts[i], targets[j], payloadAmt, 'weaken');
                 //await deploy(ns, hosts[i], targets[j], payloadAmt, 'grow');
                 await deploy(ns, hosts[i], targets[j], payloadAmt, 'train');
-                await waitRandom(ns, 1000, 500);
+                //await waitRandom(ns, 1000, 500);
             }
         }
     }
@@ -102,9 +102,9 @@ async function deploy(ns, host, target, payloadAmt, mode = 'normal') {
     await ns.scp(files, 'home', host);
     if (payloadAmt > 0) {
         await ns.exec(PAYLOAD, host, payloadAmt, target, mode);
-        if (mode == 'normal') {
-            ns.tprint('INFO - ' + 'PAYLOAD [' + mode + ']: (' + zfill(payloadAmt, 5) + ')\t' + pad(host, 18) + '->\t' + target);
-        }
+        //if (mode == 'normal') {
+        ns.tprint('INFO - ' + 'PAYLOAD [' + mode + ']: (' + zfill(payloadAmt, 5) + ')\t' + pad(host, 18) + '->\t' + target);
+        //}
         totalPayloads += payloadAmt;
     } else {
         ns.tprint('WARN - ' + host + ' has no ram to run scripts from');

@@ -31,7 +31,7 @@ export async function main(ns) {
 
     // INITIALIZE
     // work.js, upgrade.js, contracts.js, stocks.js, hacknet.js, extend-status-overlay.js
-    var filesToDeploy = ['/lib/lib.js', '/bin/work.js', '/bin/contracts.js', '/bin/upgrades.js']; // '/bin/extend-status-overlay.js', '/ui/Base.js', '/ui/StatusBar.js', '/ui/StatusContainer.js',
+    var filesToDeploy = ['/lib/lib.js', '/bin/work.js', '/bin/contracts.js', '/bin/upgrades.js', 'stocks.js']; // '/bin/extend-status-overlay.js', '/ui/Base.js', '/ui/StatusBar.js', '/ui/StatusContainer.js',
     await init(ns, filesToDeploy);
 
     // Status Overlay seems to only run on home
@@ -42,7 +42,27 @@ export async function main(ns) {
     await ns.run('/wm/wintermute-recon.js', 1, specificTarget);
 }
 
+/** @param {import("../../.").NS } ns **/
 async function init(ns, filesToDeploy) {
+    var wintermuteBanner = "\n" +
+        "   _.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._\n" +
+        ".-'---      - ---     --     ---   -----      - ---     --     ---   -----      - ---     --     ---   -----      - --- --- `-.\n" +
+        " )    ▄█     █▄   ▄█  ███▄▄▄▄       ███        ▄████████    ▄████████   ▄▄▄▄███▄▄▄▄   ███    █▄      ███        ▄████████    ( \n" +
+        "(    ███     ███ ███  ███▀▀▀██▄ ▀█████████▄   ███    ███   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███    ███ ▀█████████▄   ███    ███     )\n" +
+        " )   ███     ███ ███▌ ███   ███    ▀███▀▀██   ███    █▀    ███    ███ ███   ███   ███ ███    ███    ▀███▀▀██   ███    █▀     ( \n" +
+        "(    ███     ███ ███▌ ███   ███     ███   ▀  ▄███▄▄▄      ▄███▄▄▄▄██▀ ███   ███   ███ ███    ███     ███   ▀  ▄███▄▄▄         )\n" +
+        " )   ███     ███ ███▌ ███   ███     ███     ▀▀███▀▀▀     ▀▀███▀▀▀▀▀   ███   ███   ███ ███    ███     ███     ▀▀███▀▀▀        ( \n" +
+        "(    ███     ███ ███  ███   ███     ███       ███    █▄  ▀███████████ ███   ███   ███ ███    ███     ███       ███    █▄      )\n" +
+        " )   ███ ▄█▄ ███ ███  ███   ███     ███       ███    ███   ███    ███ ███   ███   ███ ███    ███     ███       ███    ███    ( \n" +
+        "(     ▀███▀███▀  █▀    ▀█   █▀     ▄████▀     ██████████   ███    ███  ▀█   ███   █▀  ████████▀     ▄████▀     ██████████     )\n" +
+        " )                                                         ███    ███                                                        ( \n" +
+        "(___       _       _       _       _       _       _       _       _       _       _       _       _       _       _       ___)\n" +
+        "    `-._.-' (___ _) `-._.-' `-._.-' `-._.-' `-._.-' `-._.-' )     ( `-._.-' `-._.-' `-._.-' `-._.-' `-._.-' (__ _ ) `-._.-'\n" +
+        "            ( _ __)                                        (_     _)                                        (_ ___)\n" +
+        "            (__  _)                                         `-._.-'                                         (___ _)\n" +
+        "            `-._.-'                                                                                         `-._.-'\n";
+
+    ns.tprint(wintermuteBanner);
     printBanner(ns, 'WINTERMUTE - INIT');
 
     specificTarget = '';
@@ -54,13 +74,22 @@ async function init(ns, filesToDeploy) {
 
     if (!ns.serverExists('home-extras')) {
         // attempt to purchase a server for 128GB
+        if (!ns.serverExists('home-extras') && ns.getPlayer().money > ns.getPurchasedServerCost(128)) {
+            ns.purchaseServer('home-extras', 128);
+        }
     }
 
     if (ns.serverExists('home-extras')) {
         for (var i = 0; i < filesToDeploy.length; i++) {
+            ns.tprint('Deploying ' + filesToDeploy[i] + '...');
             await runRemoteScript(ns, filesToDeploy[i], 'home-extras');
         }
     } else { ns.tprint('ERROR - No home-extras server found'); }
+
+    if (ns.serverExists('home-extras') && (ns.getPlayer().money > 10e9) || ns.fileExists('/bin/stocks.js', 'home-extras')) { // 10 bil
+        ns.tprint('Deploying Stocks...');
+        await runRemoteScript(ns, '/bin/stocks.js', 'home-extras');
+    }
 
     return true;
 }

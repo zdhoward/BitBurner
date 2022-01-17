@@ -32,39 +32,39 @@ function purchaseFromDarkweb(ns) {
     }
 
     if (ns.serverExists("darkweb")) {
-        if (!ns.fileExists('BruteSSH.exe', 'home')) {
-            if (money > 1000000 * 3) {
-                ns.purchaseDarkweb('SQLInject.exe');
+        if (!ns.fileExists('FTPCrack.exe', 'home')) {
+            if (money > 1500000 * 3) {
+                ns.purchaseProgram('FTPCrack.exe');
             }
         }
         if (!ns.fileExists('relaySMTP.exe', 'home')) {
             if (money > 5000000 * 3) {
-                ns.purchaseDarkweb('SQLInject.exe');
+                ns.purchaseProgram('SQLInject.exe');
             }
         }
         if (!ns.fileExists('HTTPWorm.exe', 'home')) {
             if (money > 30000000 * 3) {
-                ns.purchaseDarkweb('HTTPWorm.exe');
+                ns.purchaseProgram('HTTPWorm.exe');
             }
         }
         if (!ns.fileExists('SQLInject.exe', 'home')) {
             if (money > 250000000 * 3) {
-                ns.purchaseDarkweb('SQLInject.exe');
+                ns.purchaseProgram('SQLInject.exe');
             }
         }
         if (!ns.fileExists('AutoLink.exe', 'home')) {
             if (money > 1000000 * 3) {
-                ns.purchaseDarkweb('AutoLink.exe');
+                ns.purchaseProgram('AutoLink.exe');
             }
         }
         if (!ns.fileExists('DeepscanV1.exe', 'home')) {
             if (money > 500000 * 3) {
-                ns.purchaseDarkweb('DeepscanV1.exe');
+                ns.purchaseProgram('DeepscanV1.exe');
             }
         }
         if (!ns.fileExists('DeepscanV2.exe', 'home')) {
             if (money > 25000000 * 3) {
-                ns.purchaseDarkweb('DeepscanV1.exe');
+                ns.purchaseProgram('DeepscanV2.exe');
             }
         }
     }

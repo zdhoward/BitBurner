@@ -19,6 +19,15 @@
 //
 //    Is this worth the effort?
 
+//
+//  Split payload into 3 files?
+//  - dispatch.js [target] - make all calcs and kick off grow
+//  - grow.js [target]
+//  - weaken.js
+//  - hack.js
+//
+//  find the largest ram file of the 3 and use that for payloadAmt
+//
 
 /** @param {NS} ns **/
 export async function main(ns) {

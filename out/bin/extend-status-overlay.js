@@ -1,8 +1,28 @@
-import { allServers, getBotnet } from '/lib/lib.js';
+import { getBotnet } from '/lib/lib.js';
 import { StatusContainer } from "/ui/StatusContainer.js";
 import { StatusBarText, StatusBarProgress } from "/ui/StatusBar.js";
 
 //eval("ns.bypass(document);");
+var visited = {};
+
+/** @param {import("../../.").NS } ns
+*   @param 0 hostname
+*/
+async function serverScanRecursive(ns, hostname) {
+    if (visited[hostname] == true) {
+        return;
+    }
+
+    visited[hostname] = true;
+
+    var remoteHosts = ns.scan(hostname);
+    for (var i in remoteHosts) {
+        var remoteHost = remoteHosts[i];
+        if (ns.serverExists(remoteHost)) {
+            await serverScanRecursive(ns, remoteHost);
+        }
+    }
+}
 
 export function shorten(x, suffix = '', { precision = 2, sep = '', div = 1000 } = {}) {
     const labels = ['', 'k', 'm', 'b', 't', 'q']
@@ -19,7 +39,7 @@ function cleanUp() {
 }
 
 // I don't actually use a hardcoded list like this, but I wanted the sample to work out of the box
-const HOSTNAMES = allServers;
+var HOSTNAMES = '';
 
 const CHECK = (hover) => `<span style="font-size:0.9em; color:green; vertical-align:0.1em" title="${hover}">✔</span>`
 const XFAIL = (hover) => `<span style="font-size:0.8em; color:red;   vertical-align:0.2em" title="${hover}">✘</span>`
@@ -28,6 +48,8 @@ const XFAIL = (hover) => `<span style="font-size:0.8em; color:red;   vertical-al
 export async function main(ns) {
     eval("ns.bypass(document);");
     ns.disableLog("ALL");
+    await serverScanRecursive(ns, "home")
+    HOSTNAMES = Object.keys(visited)
     function getRootedCount() {
         //const hosts = [new HostExtended(ns, 'home', []), ...Object.values(scan(ns, 20))].filter(h=>(!h.isPrivate()))
         const hosts = HOSTNAMES.filter(hn => ns.serverExists(hn))
@@ -36,7 +58,7 @@ export async function main(ns) {
     }
 
     function gfree() {
-        const hosts = HOSTNAMES.filter(hn => ns.serverExists(hn)).filter(hn => ns.hasRootAccess(hn))
+        const hosts = HOSTNAMES.filter(hn => ns.serverExists(hn)).filter(hn => ns.hasRootAccess(hn) && !hn.startsWith("home") && !hn.startsWith("BOT"))
 
         let memUsed = 0, memMax = 0
         hosts.forEach(hn => {
@@ -92,8 +114,9 @@ export async function main(ns) {
     let bars = {
         hlev: new StatusBarProgress(doc, { container, labelText: 'targets' }),//, clickHandler: () => ns.run("/tools/peers.js"), barColor: '#273061' }),
         home: new StatusBarProgress(doc, { container, labelText: 'home' }),
-        gmem: new StatusBarProgress(doc, { container, labelText: 'global' }),
+        gmem: new StatusBarProgress(doc, { container, labelText: 'remotes' }),
         bmem: new StatusBarProgress(doc, { container, labelText: 'botnet' }),
+        amem: new StatusBarProgress(doc, { container, labelText: 'all' }),
         ram: new StatusBarText(doc, { container, labelText: 'RAM' }),
         exes: new StatusBarText(doc, { container, labelText: 'EXEs' }),
         cont: new StatusBarText(doc, { container, labelText: 'Contracts' }), //, clickHandler: () => ns.run("contract-hunter.js", 1, "--solve", "ALL") }),
@@ -118,10 +141,12 @@ export async function main(ns) {
         let [hused, hmax] = [ns.getServerUsedRam('home'), ns.getServerMaxRam('home')]
         let [gused, gmax] = gfree()
         let [bused, bmax] = bfree()
+        let [aused, amax] = [hused + gused + bused, hmax + gmax + bmax]
         bars.home.progress = hused / hmax
         bars.gmem.progress = gused / gmax
         bars.bmem.progress = bused / bmax
-        bars.ram.rlabel = (hmax + gmax + bmax) + 'GB'
+        bars.amem.progress = aused / amax
+        bars.ram.rlabel = shorten(hmax + gmax + bmax, ' GB')
 
         // Unlockers
         if ((iteration % 100) == 0) {

@@ -21,6 +21,8 @@ export async function main(ns) {
 
     var augsToBuy = getAugsToBuy(ns, ownedAugs, augTypesToBuy); // determines which augs are in the right category
 
+    suggestAugToBuy(ns);
+
     // need to choose good buys now
     //   must be the most expensive augmentations that are not owned
     //   must flag to stop buying when the costs are too high
@@ -28,7 +30,7 @@ export async function main(ns) {
     //augsToBuy.forEach(info => { if (info.startsWith('hacking')) { return true }});
 
     for (var i = 0; i < availableFactions.length; i++) {
-        buyBestAugFromFaction(ns, availableFactions[i], ownedAugs, augsToBuy);
+        //buyBestAugFromFaction(ns, availableFactions[i], ownedAugs, augsToBuy);
     }
     return;
 
@@ -51,6 +53,31 @@ export async function main(ns) {
         ns.tprint('\nFaction: ' + allFactions[i] + ' \tRep: ' + rep + augInfo);
 
     }
+}
+
+function suggestAugToBuy(ns) {
+    var factions = ns.getPlayer().factions;
+    var ownedAugs = ns.getOwnedAugmentations(true);
+    var augsToBuy = getAugsToBuy(ns, ownedAugs, ['hacking', 'faction']);
+
+    var bestAugFaction = '';
+    var bestAug = '';
+    var bestAugCost = 0;
+
+    for (var i = 0; i < factions.length; i++) {
+        var faction = factions[i];
+        var augs = ns.getAugmentationsFromFaction(faction);
+        for (var j = 0; j < augs.length; j++) {
+            var cost = ns.getAugmentationPrice(augs[j]);
+            if (cost > bestAugCost && augsToBuy.includes(augs[j]) && !ownedAugs.includes(augs[j])) {
+                bestAug = augs[j];
+                bestAugCost = cost;
+                bestAugFaction = faction;
+            }
+        }
+    }
+
+    ns.tprint('Buy ' + bestAug + ' from ' + bestAugFaction + ' for ' + formatMoney(ns, bestAugCost));
 }
 
 /** @param {import("../../.").NS } ns 

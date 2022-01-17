@@ -67,7 +67,10 @@ async function tryWorkFactions(ns) {
                 var workType = 'Hacking Contracts';
                 ns.print("Trying To Work For Faction: " + factions[i] + ' - ' + formatMoney(ns, factionRep) + "/" + formatMoney(ns, repGoal));
                 ns.workForFaction(factions[i], workType, false);
-                await ns.sleep(1000 * 60 * 10); // 2 mins
+                await ns.sleep(1000 * 60 * 10); // 10 mins
+                while (ns.isFocused()) {
+                    await ns.sleep(1000);
+                }
                 ns.stopAction();
                 return;
             }
