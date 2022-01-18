@@ -1,9 +1,12 @@
-import { formatMoney, pad } from '/lib/lib.js';
+import { formatMoney, pad, STOCKS_PORT } from '/lib/lib.js';
 
 var refreshRateInSeconds = 4;
 
+var stopBuying = false;
+
 /** @param {NS} ns **/
 export async function main(ns) {
+    ns.toast('stocks.js has started', 'info');
     await startStockTrader(ns);
 }
 
@@ -32,10 +35,10 @@ async function printStockStatus(ns) {
 
             var profits = ns.stock.getSaleGain(stock, myShares, 'long');
 
-            //ns.tprint(pad('[' + stock + ']', 8) + ': ' + formatMoney(ns, price) + ' (' + volatility.toFixed(3) + ') - ' + forecast.toFixed(3) + ' - ' + formatMoney(ns, amount));
+            //ns.tprint(pad('[' + stock + ']', 8) + ': ' + formatMoney( price) + ' (' + volatility.toFixed(3) + ') - ' + forecast.toFixed(3) + ' - ' + formatMoney( amount));
             //ns.tprint("My Position: " + myShares + ' shares at ' + avgPaid + ' each');
             //ns.tprint("My Shorts: " + myShorts + ' shares at ' + avgPaidShorts + ' each');
-            printLine(ns, stock, "$" + formatMoney(ns, price), volatility.toFixed(3), forecast.toFixed(3), formatMoney(ns, amount), formatMoney(ns, myShares), "$" + formatMoney(ns, avgPaid), formatMoney(ns, myShorts), "$" + formatMoney(ns, avgPaidShorts), "$" + formatMoney(ns, profits));
+            printLine(ns, stock, "$" + formatMoney(price), volatility.toFixed(3), forecast.toFixed(3), formatMoney(amount), formatMoney(myShares), "$" + formatMoney(avgPaid), formatMoney(myShorts), "$" + formatMoney(avgPaidShorts), "$" + formatMoney(profits));
         }
 
         await ns.sleep(refreshRateInSeconds * 1000);
@@ -73,19 +76,30 @@ async function startStockTrader(ns) {
     }
 
     function buyPositions(stock) {
-        var maxShares = (ns.stock.getMaxShares(stock) * maxSharePer) - position[0];
-        var askPrice = ns.stock.getAskPrice(stock);
-        var forecast = ns.stock.getForecast(stock);
-        var volPer = ns.stock.getVolatility(stock);
-        var playerMoney = ns.getServerMoneyAvailable('home');
+        var msg = ns.readPort(STOCKS_PORT);
+        if (msg == 'STOP') {
+            stopBuying = true;
+        } else if (msg == 'START') {
+            stopBuying = false;
+        }
 
-        if (forecast >= stockBuyPer && volPer <= stockVolPer) {
-            if (playerMoney - moneyKeep > Math.max(ns.stock.getPurchaseCost(stock, minSharePer, "Long"), 1e9 + moneyKeep)) {
-                var shares = Math.min((playerMoney - moneyKeep - 100000) / askPrice, maxShares);
-                ns.stock.buy(stock, shares);
-                //ns.print('Bought: '+ stock + '')
-                ns.toast('Bought: ' + stock + ' x ' + formatMoney(ns, shares) + ' for $' + formatMoney(ns, askPrice * shares), 'info', 5000);
-                ns.alert('Bought: ' + stock + ' x ' + formatMoney(ns, shares) + ' for $' + formatMoney(ns, askPrice * shares), 'info', 5000);
+        if (!stopBuying) {
+            var maxShares = (ns.stock.getMaxShares(stock) * maxSharePer) - position[0];
+            var askPrice = ns.stock.getAskPrice(stock);
+            var forecast = ns.stock.getForecast(stock);
+            var volPer = ns.stock.getVolatility(stock);
+            var playerMoney = ns.getServerMoneyAvailable('home');
+
+            if (forecast >= stockBuyPer && volPer <= stockVolPer) {
+                if (playerMoney - moneyKeep > Math.max(ns.stock.getPurchaseCost(stock, minSharePer, "Long"), 1e9 + moneyKeep)) {
+                    var shares = Math.min((playerMoney - moneyKeep - 100000) / askPrice, maxShares);
+                    if (shares > 0) {
+                        ns.stock.buy(stock, shares);
+                        //ns.print('Bought: '+ stock + '')
+                        ns.toast('Bought: ' + stock + ' x ' + formatMoney(shares) + ' for $' + formatMoney(askPrice * shares), 'info', 5000);
+                        //ns.alert('Bought: ' + stock + ' x ' + formatMoney( shares) + ' for $' + formatMoney( askPrice * shares), 'info', 5000);
+                    }
+                }
             }
         }
     }
@@ -97,8 +111,8 @@ async function startStockTrader(ns) {
         if (forecast < 0.5 || profit < -10000000) {
             ns.stock.sell(stock, position[0]);
             //ns.print('Sold: '+ stock + '')
-            ns.toast('Sold: ' + stock + ' for $' + formatMoney(ns, profit), 'info', 5000);
-            ns.alert('Sold: ' + stock + ' for $' + formatMoney(ns, profit), 'info', 5000);
+            ns.toast('Sold: ' + stock + ' for $' + formatMoney(profit), 'info', 5000);
+            //ns.alert('Sold: ' + stock + ' for $' + formatMoney( profit), 'info', 5000);
         }
     }
 }

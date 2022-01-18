@@ -5,11 +5,12 @@ var allFactions = ['NiteSec', 'Netburners', 'CyberSec', 'The Black Hand'];
 // TIAN DI HUI = FACTION REP BONUSES
 // CYBERSEC = Cheap Hacking Bonuses
 
-var factionToBuyFromFirst = ['CyberSec', 'NiteSec', 'Tian Di Hui', 'Netburners',];
+var factionToBuyFromFirst = ['CyberSec', 'NiteSec', 'Tian Di Hui', 'BitRunners',];
 var augsToBuyFirst = [''];
 
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
+    ns.toast('augs.js has started', 'info');
     var money = ns.getPlayer().money;
 
     var factionInvites = ns.checkFactionInvitations();
@@ -47,7 +48,7 @@ export async function main(ns) {
             var cost = ns.getAugmentationPrice(augs[j]);
             var repCost = ns.getAugmentationRepReq(augs[j]);
 
-            augInfo += '\n\tAug: ' + pad(augs[j], 45) + '\tRep Cost: ' + pad(formatMoney(ns, repCost), 7) + '\t $ Cost: ' + formatMoney(ns, cost);
+            augInfo += '\n\tAug: ' + pad(augs[j], 45) + '\tRep Cost: ' + pad(formatMoney(repCost), 7) + '\t $ Cost: ' + formatMoney(cost);
         }
 
         ns.tprint('\nFaction: ' + allFactions[i] + ' \tRep: ' + rep + augInfo);
@@ -77,7 +78,7 @@ function suggestAugToBuy(ns) {
         }
     }
 
-    ns.tprint('Buy ' + bestAug + ' from ' + bestAugFaction + ' for ' + formatMoney(ns, bestAugCost));
+    ns.tprint('Buy ' + bestAug + ' from ' + bestAugFaction + ' for ' + formatMoney(bestAugCost));
 }
 
 /** @param {import("../../.").NS } ns 
@@ -100,7 +101,7 @@ function buyBestAugFromFaction(ns, faction, ownedAugs, augsToBuy) {
         }
     }
     if (mostExpensiveAug != '') {
-        ns.tprint('INFO - Recommend Buying ' + mostExpensiveAug + ' from ' + faction + ' for ' + formatMoney(ns, mostExpensiveAugCost));
+        ns.tprint('INFO - Recommend Buying ' + mostExpensiveAug + ' from ' + faction + ' for ' + formatMoney(mostExpensiveAugCost));
     }
     return mostExpensiveAug;
 }

@@ -29,8 +29,8 @@ function purchaseNewAttackBot(ns) {
 
 
     if (ns.purchaseServer(name, ramSize)) {
-        ns.tprint('INFO - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(ns, cost));
-    } else { ns.print('ERROR - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(ns, cost)); }
+        ns.tprint('INFO - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(cost));
+    } else { ns.print('ERROR - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(cost)); }
 }
 
 /** @param {import("../../.").NS } ns 

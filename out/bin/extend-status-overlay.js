@@ -1,8 +1,8 @@
-import { getBotnet } from '/lib/lib.js';
+import { getBotnet, formatMoney } from '/lib/lib.js';
 import { StatusContainer } from "/ui/StatusContainer.js";
 import { StatusBarText, StatusBarProgress } from "/ui/StatusBar.js";
+import { getRepGoal } from '/bin/work.js';
 
-//eval("ns.bypass(document);");
 var visited = {};
 
 /** @param {import("../../.").NS } ns
@@ -32,7 +32,7 @@ export function shorten(x, suffix = '', { precision = 2, sep = '', div = 1000 } 
 
 // NOTE: Accessing 'document' like this costs something crazy, like 25GB of RAM.  There's a free way
 //  there, which you can replace this with, but I'll leave that to you.
-const doc = eval("document");
+const doc = eval('document');
 
 function cleanUp() {
     (new StatusContainer(doc)).destroy()
@@ -46,8 +46,10 @@ const XFAIL = (hover) => `<span style="font-size:0.8em; color:red;   vertical-al
 
 /** @param {NS} ns **/
 export async function main(ns) {
-    eval("ns.bypass(document);");
+    //const doc = eval('document');
+    //eval("ns.bypass(document);");
     ns.disableLog("ALL");
+    ns.toast('extend-status-overlay.js has started', 'info');
     await serverScanRecursive(ns, "home")
     HOSTNAMES = Object.keys(visited)
     function getRootedCount() {
@@ -87,6 +89,31 @@ export async function main(ns) {
         return contracts.length
     }
 
+    function getStocksValue() {
+        var stocks = ns.stock.getSymbols().sort(function (a, b) { return ns.stock.getForecast(b) - ns.stock.getForecast(a); })
+        var stockValue = 0;
+        var stockCosts = 0;
+        for (const stock of stocks) {
+            var position = ns.stock.getPosition(stock);
+            if (position[0]) {
+                //ns.print('Position: ' + stock + ', ')
+                stockValue += position[0] * ns.stock.getPrice(stock);
+                stockCosts += position[0] * position[1];
+            }
+        }
+        return [stockValue, stockValue - stockCosts];
+    }
+
+    function getWorkingFactionInfo(ns) {
+        var factionName = ns.getPlayer().currentWorkFactionName;
+        var factionRep = ns.getFactionRep(factionName);
+        var repGoal = getRepGoal(ns, factionName);
+        if (!factionName) {
+            factionName = "None";
+        }
+        return [factionRep, repGoal, factionName];//formatMoney(factionRep) + "/" + formatMoney(repGoal)];
+    }
+
 
     // Cleanup now (if we're developing, we want to destroy any existing element and start fresh)
     cleanUp()
@@ -123,7 +150,10 @@ export async function main(ns) {
         totalIncome: new StatusBarText(doc, { container, labelText: 'Total' }),
         income: new StatusBarText(doc, { container, labelText: '$' }),
         xpgain: new StatusBarText(doc, { container, labelText: 'XP' }),
+        stocksHeld: new StatusBarText(doc, { container, labelText: 'Stk Held' }),
+        stocksProfit: new StatusBarText(doc, { container, labelText: 'Stk Profit' }),
         karma: new StatusBarText(doc, { container, labelText: 'Karma' }),
+        workingFaction: new StatusBarProgress(doc, { container, labelText: 'Faction', barColor: '#253b50' }),
     }
 
     // Instead of a while(true) loop -- which would work -- we use this infinite for loop counter.
@@ -162,6 +192,10 @@ export async function main(ns) {
             bars.cont.rlabel = countContracts()
         }
 
+        var [held, profit] = getStocksValue()
+        bars.stocksHeld.rlabel = "$" + shorten(held)
+        bars.stocksProfit.rlabel = "$" + shorten(profit)
+
         // Income & Experience
         let [incomePerSecond, incomeSinceReset] = ns.getScriptIncome()
         let experiencePerSecond = ns.getScriptExpGain()
@@ -169,6 +203,10 @@ export async function main(ns) {
         bars.income.rlabel = shorten(incomePerSecond, '/sec')
         bars.xpgain.rlabel = shorten(experiencePerSecond, '/sec')
         bars.karma.rlabel = ns.heart.break()
+
+        var [rep, goal, info] = getWorkingFactionInfo(ns);
+        bars.workingFaction.progress = rep / goal;
+        bars.workingFaction.rlabel = info;
 
         // Important: this must be asleep and not sleep if we want our clickHandlers to work.
         await ns.asleep(500)

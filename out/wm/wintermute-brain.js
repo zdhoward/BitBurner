@@ -25,6 +25,10 @@ import { printBanner, runRemoteScript } from '/lib/lib.js';
 
 var specificTarget = '';
 
+export function autocomplete(data, args) {
+    return [...data.servers];
+}
+
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
     ns.disableLog('ALL');
@@ -34,7 +38,7 @@ export async function main(ns) {
     var filesToDeploy = ['/lib/lib.js', '/bin/work.js', '/bin/contracts.js', '/bin/upgrades.js', 'stocks.js']; // '/bin/extend-status-overlay.js', '/ui/Base.js', '/ui/StatusBar.js', '/ui/StatusContainer.js',
     await init(ns, filesToDeploy);
 
-    //await ns.scriptKill('/bin/mastermind-payload.js', 'home');
+    await ns.scriptKill('/bin/mastermind-payload.js', 'home');
 
     // Status Overlay seems to only run on home
     //await ns.run('/bin/extend-status-overlay.js');

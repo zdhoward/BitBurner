@@ -17,6 +17,7 @@ export var FAIL = "✘";
 //["n00dles", "foodnstuff", "nectar-net", "neo-net", "comptek", "syscore", "aevum-police", "millenium-fitness", "crush-fitness", "avmnite-02h", "zb-institute", "summit-uni", "I.I.I.I", "rho-construction", "galactic-cyber", "global-pharm", "snap-fitness", "unitalife", "phantasy", "CSEC", "sigma-cosmetics", "joesguns", "zer0", "silver-helix", "netlink", "johnson-ortho", "rothman-uni", "lexo-corp", "alpha-ent", "aerocorp", "omnia", "defcomm", "univ-energy", "taiyang-digital", "run4theh111z", "vitalife", "omnitek", "clarkinc", "zb-def", "deltaone", "icarus", "infocomm", "titan-labs", "helios", "kuai-gong", "powerhouse-fitness", "fulcrumassets", "The-Cave", "microdyne", "fulcrumtech", "solaris", "zeus-med", "nova-med", "applied-energetics", "stormtech", "4sigma", "nwo", ".", "b-and-a", "ecorp", "megacorp", "blade", "omega-net", "the-hub", "catalyst", "hong-fang-tea", "max-hardware", "harakiri-sushi", "iron-gym", "darkweb"];
 
 export var MASTERMIND_PORT = 20;
+export var STOCKS_PORT = 19;
 
 /** @param {import("../../.").NS } ns */
 export function main(ns) {
@@ -67,7 +68,7 @@ export async function printBanner(ns, msg) {
  *  @param 0 money
  *  @return formattedMoney
  */
-export function formatMoney(ns, money) {
+export function formatMoney(money, precision = 2) {
     var suffix = '';
     if (money >= 1000000000000) {
         suffix = 'T';
@@ -83,7 +84,7 @@ export function formatMoney(ns, money) {
         money /= 1000;
     }
 
-    return ns.nFormat(money, "0,0.00") + suffix;
+    return Number(money).toFixed(precision).toLocaleString('en-us') + suffix; //ns.nFormat(money, "0,0.00") + suffix;
 }
 
 /* @param0 dict to serialize

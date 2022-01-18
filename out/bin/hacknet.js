@@ -5,6 +5,8 @@ export async function main(ns) {
     ns.disableLog("getServerMoneyAvailable");
     ns.disableLog("sleep");
 
+    ns.toast('hacknet.js has started', 'info');
+
     if (ns.hacknet.numNodes() == 0) {
         ns.hacknet.purchaseNode();
         ns.print("First node purchased");

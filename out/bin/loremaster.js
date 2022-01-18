@@ -5,6 +5,7 @@ var seenFiles = [];
 
 /** @param {NS} ns **/
 export async function main(ns) {
+    ns.toast('loremaster.js has started', 'info');
     visited = {};
     seenFiles = [];
     await serverScanRecursive(ns, ns.getHostname());

@@ -41,7 +41,7 @@ async function runPayload(ns, target, mode) {
             ns.print('Growing ' + target + ' in ' + ns.tFormat(ns.getGrowTime(target)) + ' seconds');
             var growth = await ns.grow(target);
             ns.print("Grew " + target + " for " + growth.toFixed(2));
-            ns.print("MONEY: " + formatMoney(ns, ns.getServerMoneyAvailable(target).toFixed(2)) + " / " + formatMoney(ns, ns.getServerMaxMoney(target).toFixed(2)));
+            ns.print("MONEY: " + formatMoney(ns.getServerMoneyAvailable(target).toFixed(2)) + " / " + formatMoney(ns.getServerMaxMoney(target).toFixed(2)));
             break;
         default:
             if (ns.getServerSecurityLevel(target) > securityThresh) {
@@ -53,11 +53,11 @@ async function runPayload(ns, target, mode) {
                 ns.print('Growing ' + target + ' in ' + ns.tFormat(ns.getGrowTime(target)) + ' seconds');
                 var growth = await ns.grow(target);
                 ns.print("Grew " + target + " for " + growth.toFixed(2));
-                ns.print("MONEY: " + formatMoney(ns, ns.getServerMoneyAvailable(target).toFixed(2)) + " / " + formatMoney(ns, ns.getServerMaxMoney(target).toFixed(2)));
+                ns.print("MONEY: " + formatMoney(ns.getServerMoneyAvailable(target).toFixed(2)) + " / " + formatMoney(ns.getServerMaxMoney(target).toFixed(2)));
             } else {
                 ns.print('Hacking ' + target + ' in ' + ns.tFormat(ns.getHackTime(target)) + ' seconds');
                 var loot = await ns.hack(target);
-                ns.print("Hacked " + target + " for $" + formatMoney(ns, loot));
+                ns.print("Hacked " + target + " for $" + formatMoney(loot));
                 var monitorMsg = JSON.stringify({ name: ns.getHostname(), loot: loot });
                 ns.tryWritePort(MASTERMIND_PORT, monitorMsg);
             }

@@ -1,5 +1,9 @@
 import { formatMoney, pad } from '/lib/lib.js';
 
+export function autocomplete(data, args) {
+    return [...data.servers];
+}
+
 /** @param {NS} ns 
  *  @param 0 server
  */
@@ -22,7 +26,7 @@ export async function main(ns) {
         ns.tprint("INFO - " + "||                     Cores: " + pad(server.cpuCores, 26) + "||");
         ns.tprint("INFO - " + "||                    Rooted: " + pad(server.hasAdminRights, 26) + "||");
         ns.tprint("INFO - " + "||                  Backdoor: " + pad(server.backdoorInstalled, 26) + "||");
-        ns.tprint("INFO - " + "||                     Money: " + pad(formatMoney(ns, server.moneyAvailable) + '/' + formatMoney(ns, server.moneyMax), 26) + "||");
+        ns.tprint("INFO - " + "||                     Money: " + pad(formatMoney(server.moneyAvailable) + '/' + formatMoney(server.moneyMax), 26) + "||");
         ns.tprint("INFO - " + "||                  Security: " + pad(ns.getServerSecurityLevel(serverName) + '/' + ns.getServerMinSecurityLevel(serverName), 26) + "||");
         ns.tprint("INFO - " + "||                 Purchased: " + pad(server.purchasedByPlayer, 26) + "||");
         ns.tprint("INFO - " + "||                   Max RAM: " + pad(server.maxRam, 26) + "||");

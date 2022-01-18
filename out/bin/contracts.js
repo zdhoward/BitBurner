@@ -10,6 +10,7 @@ export async function main(ns) {
     ns.disableLog('sleep');
 
     ns.print('Starting contracts.js...');
+    ns.toast('contracts.js has started', 'info');
 
     while (true) {
         // Recursively spread through all computers

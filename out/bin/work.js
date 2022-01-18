@@ -7,7 +7,8 @@ var factionsToNotAcceptImmediately = ['Sector-12', 'Chongqing', 'New Tokyo', 'Is
 
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
-    ns.disableLog('ALL');
+    //ns.disableLog('ALL');
+    ns.toast('work.js has started', 'info');
     ns.stopAction();
     // Gain Rep
     // Always have a focus
@@ -65,7 +66,7 @@ async function tryWorkFactions(ns) {
             //ns.tprint(factions[i] + ' Rep Goal: ' + repGoal);
             if (factionRep < repGoal) {
                 var workType = 'Hacking Contracts';
-                ns.print("Trying To Work For Faction: " + factions[i] + ' - ' + formatMoney(ns, factionRep) + "/" + formatMoney(ns, repGoal));
+                ns.print("Trying To Work For Faction: " + factions[i] + ' - ' + formatMoney(factionRep) + "/" + formatMoney(repGoal));
                 ns.workForFaction(factions[i], workType, false);
                 await ns.sleep(1000 * 60 * 10); // 10 mins
                 while (ns.isFocused()) {
@@ -79,7 +80,7 @@ async function tryWorkFactions(ns) {
 }
 
 /** @param {import("../../.").NS } ns **/
-function getRepGoal(ns, faction) {
+export function getRepGoal(ns, faction) {
     var augs = ns.getAugmentationsFromFaction(faction);
     var ownedAugs = ns.getOwnedAugmentations(true);
 

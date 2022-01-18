@@ -1,7 +1,12 @@
 import { generateIPs } from '/bin/contracts.js';
+import { getRepGoal } from '/bin/work.js';
+import { formatMoney } from '/lib/lib.js';
 // FIX ARRAY JUMPING
 // 2,7,0,0,7,9,2,0,1,1 <-- fails
 
+export function autocomplete(data, args) {
+    return [...data.servers];
+}
 
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
@@ -14,6 +19,32 @@ export async function main(ns) {
     // Acquire a reference to the terminal list of lines.
     //const list = ;
 
+    if (ns.getPlayer().isWorking) {
+        var line = getWorkingFactionInfo(ns);
+        ns.tprint(line);
+    } else {
+        ns.tprint('NOT FOCUSED');
+    }
+    //ns.setFocus()
+    //ns.tprint(html);
+}
+
+function getWorkingFactionInfo(ns) {
+    var factionName = ns.getPlayer().currentWorkFactionName;
+    var factionRep = ns.getFactionRep(factionName);
+    var repGoal = getRepGoal(ns, factionName);
+    return formatMoney(factionRep) + "/" + formatMoney(repGoal);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+/** @param {import("../../.").NS } ns **/
+function uniquePathsII(ns, data) {
+
+}
+
+function injectHTML() {
+    var doc = eval("document");
     var liClass = "jss1414 MuiListItem-root MuiListItem-gutters MuiListItem-padding css-1sslzpn";
     var pClass = "jss1419 MuiTypography-root MuiTypography-body1 css-12bw0zz";
 
@@ -26,16 +57,7 @@ export async function main(ns) {
     var linkedHTML = '<li class="' + liClass + '"><a class="' + aClass + '"<p class="' + pClass + '">n00dles</p></li>';
 
     // Inject some HTML.
-    document.getElementById("terminal").insertAdjacentHTML('beforeend', linkedHTML);
-
-    //ns.tprint(html);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-/** @param {import("../../.").NS } ns **/
-function uniquePathsII(ns, data) {
-
+    doc.getElementById("terminal").insertAdjacentHTML('beforeend', linkedHTML);
 }
 
 /** @param 0 array of [x,y] to solve for **/

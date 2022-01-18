@@ -2,7 +2,7 @@ import { formatMoney, getValidRamAmount } from '/lib/lib.js';
 
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
-    ns.toast("upgrades.js is starting", 'success', 5000);
+    ns.toast('upgrades.js has started', 'info');
 
     while (true) {
         // Buy TOR
@@ -97,8 +97,8 @@ function purchaseNewAttackBot(ns) {
 
 
         if (ns.purchaseServer(name, ramSize)) {
-            ns.print('INFO - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(ns, cost));
-        } else { ns.print('ERROR - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(ns, cost)); }
+            ns.print('INFO - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(cost));
+        } else { ns.print('ERROR - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(cost)); }
     }
 }
 
