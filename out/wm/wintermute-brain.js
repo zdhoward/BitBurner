@@ -18,16 +18,18 @@
 //    - hacknet.js: handle hacknet
 //    - lib.js: library of functions
 
-import { printBanner, runRemoteScript } from '/lib/lib.js';
+import { printBanner, runRemoteScript, deserializeDict, zfill, pad, waitRandom, getBotnet, serializeDict, pservPrefixes, formatMoney, allServers, MASTERMIND_PORT } from '/lib/lib.js';
+
+//import { printBanner, runRemoteScript } from '/lib/lib.js';
 
 // Personal Servers:
 //    - home-scripts: work.js, upgrade.js, extend-status-overlay.js, contracts.js, stocks.js, hacknet.js
 
 var specificTarget = '';
 
-export function autocomplete(data, args) {
-    return [...data.servers];
-}
+//export function autocomplete(data, args) {
+//    return [...data.servers];
+//}
 
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
@@ -35,14 +37,14 @@ export async function main(ns) {
 
     // INITIALIZE
     // work.js, upgrade.js, contracts.js, stocks.js, hacknet.js, extend-status-overlay.js
-    var filesToDeploy = ['/lib/lib.js', '/bin/work.js', '/bin/contracts.js', '/bin/upgrades.js', 'stocks.js']; // '/bin/extend-status-overlay.js', '/ui/Base.js', '/ui/StatusBar.js', '/ui/StatusContainer.js',
+    var filesToDeploy = ['/lib/lib.js'];//, '/bin/work.js', '/bin/contracts.js', '/bin/upgrades.js', 'stocks.js']; // '/bin/extend-status-overlay.js', '/ui/Base.js', '/ui/StatusBar.js', '/ui/StatusContainer.js',
     await init(ns, filesToDeploy);
 
     await ns.scriptKill('/bin/mastermind-payload.js', 'home');
 
     // Status Overlay seems to only run on home
     //await ns.run('/bin/extend-status-overlay.js');
-    await runRemoteScript(ns, '/bin/extend-status-overlay.js', 'home');
+    //await runRemoteScript(ns, '/bin/extend-status-overlay.js', 'home');
 
     // RUN RECON
     await ns.run('/wm/wintermute-recon.js', 1, specificTarget);
@@ -94,7 +96,7 @@ async function init(ns, filesToDeploy) {
         }
     } else { ns.tprint('ERROR - No home-extras server found'); }
 
-    if (ns.serverExists('home-extras') && (ns.getPlayer().money > 10e9) || ns.fileExists('/bin/stocks.js', 'home-extras')) { // 10 bil
+    if (ns.serverExists('home-extras') && (ns.getPlayer().money > 10e9)) { //|| ns.fileExists('/bin/stocks.js', 'home-extras')) { // 10 bil
         ns.tprint('Deploying Stocks...');
         await runRemoteScript(ns, '/bin/stocks.js', 'home-extras');
     }

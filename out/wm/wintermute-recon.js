@@ -55,7 +55,7 @@ export async function main(ns) {
 function getHosts(ns) {
     var hosts = [];
     sortedServers.forEach(function (server) {
-        if (ns.serverExists(server) && !server.startsWith('home') && ns.hasRootAccess(server)) {
+        if (ns.serverExists(server) && !pservPrefixes.includes(server.split('-')[0]) && ns.hasRootAccess(server)) {
             hosts.push(server);
         }
     });

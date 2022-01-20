@@ -73,6 +73,7 @@
 // TODO:
 //   - replace deploy.js with this? Then this script doesn't need to run on the target server
 //     - this is the easiest route
+//   - modes[xp|rep|money(default)]
 
 var threadRatios = { 'weaken': 2, 'grow': 10, 'hack': 1 };
 var batchOffset = 3000; // in ms

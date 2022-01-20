@@ -4,7 +4,8 @@ export function autocomplete(data, args) {
 
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
-    await ns.sleep(ns.args[1]);
-    await ns.grow(ns.args[0]);
-    //ns.tprint('GROWING');
+    //await ns.sleep(args[1]);
+    while (true) {
+        await ns.share();
+    }
 }

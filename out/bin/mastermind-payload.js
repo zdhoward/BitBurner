@@ -18,7 +18,9 @@ export async function main(ns) {
     var mode = ns.args[1];
 
     while (true) {
-        await runPayload(ns, target, mode);
+        if (ns.serverExists(target)) {
+            await runPayload(ns, target, mode);
+        }
     }
 }
 
@@ -72,13 +74,17 @@ function findTrainingTarget(ns) {
 
     allServers.forEach(function (server) {
         if (ns.serverExists(server)) {
-            var analysis = (ns.getHackingLevel() - ns.getServerRequiredHackingLevel(server)) / ns.getHackingLevel();
+            var analysis = ns.getHackingLevel() - ns.getServerRequiredHackingLevel(server);//) / ns.getHackingLevel();
+            //ns.tprint("Analysis of " + server + ": " + analysis.toFixed(2) + " " + targetValue.toFixed(2));
             if (analysis > targetValue) {
                 targetValue = analysis;
                 target = server;
             }
         }
     });
+
+    //ns.tprint('Training target: ' + target);
+    target = 'joesguns';
 
     return target;
 }

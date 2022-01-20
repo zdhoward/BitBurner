@@ -1,4 +1,4 @@
-import { getBotnet, formatMoney } from '/lib/lib.js';
+import { getBotnet, getSharenet, formatMoney } from '/lib/lib.js';
 import { StatusContainer } from "/ui/StatusContainer.js";
 import { StatusBarText, StatusBarProgress } from "/ui/StatusBar.js";
 import { getRepGoal } from '/bin/work.js';
@@ -83,6 +83,18 @@ export async function main(ns) {
         return [memUsed, memMax]
     }
 
+    function sfree() {
+        const hosts = getSharenet(ns);
+
+        let memUsed = 0, memMax = 0
+        hosts.forEach(hn => {
+            memUsed += ns.getServerUsedRam(hn)
+            memMax += ns.getServerMaxRam(hn)
+        })
+
+        return [memUsed, memMax]
+    }
+
     function countContracts() {
         const hosts = HOSTNAMES.filter(hn => ns.serverExists(hn)).filter(hn => ns.hasRootAccess(hn))
         const contracts = [].concat.apply([], hosts.map(hn => ns.ls(hn, '.cct')))
@@ -104,11 +116,14 @@ export async function main(ns) {
         return [stockValue, stockValue - stockCosts];
     }
 
-    function getWorkingFactionInfo(ns) {
+    function getWorkingFactionInfo() {
         var factionName = ns.getPlayer().currentWorkFactionName;
-        var factionRep = ns.getFactionRep(factionName);
-        var repGoal = getRepGoal(ns, factionName);
-        if (!factionName) {
+        var factionRep = 'N/A';
+        var repGoal = 'N/A';
+        if (factionName != "") {
+            factionRep = ns.getFactionRep(factionName);
+            repGoal = getRepGoal(ns, factionName);
+        } else {
             factionName = "None";
         }
         return [factionRep, repGoal, factionName];//formatMoney(factionRep) + "/" + formatMoney(repGoal)];
@@ -143,6 +158,7 @@ export async function main(ns) {
         home: new StatusBarProgress(doc, { container, labelText: 'home' }),
         gmem: new StatusBarProgress(doc, { container, labelText: 'remotes' }),
         bmem: new StatusBarProgress(doc, { container, labelText: 'botnet' }),
+        smem: new StatusBarProgress(doc, { container, labelText: 'sharenet' }),
         //amem: new StatusBarProgress(doc, { container, labelText: 'all' }),
         ram: new StatusBarProgress(doc, { container, labelText: 'RAM' }),//new StatusBarText(doc, { container, labelText: 'RAM' }),
         exes: new StatusBarText(doc, { container, labelText: 'EXEs' }),
@@ -153,6 +169,7 @@ export async function main(ns) {
         stocksHeld: new StatusBarText(doc, { container, labelText: 'Stk Held' }),
         stocksProfit: new StatusBarText(doc, { container, labelText: 'Stk Profit' }),
         karma: new StatusBarText(doc, { container, labelText: 'Karma' }),
+        killed: new StatusBarText(doc, { container, labelText: 'Killed' }),
         workingFaction: new StatusBarProgress(doc, { container, labelText: 'Faction', barColor: '#253b50' }),
     }
 
@@ -171,10 +188,12 @@ export async function main(ns) {
         let [hused, hmax] = [ns.getServerUsedRam('home'), ns.getServerMaxRam('home')]
         let [gused, gmax] = gfree()
         let [bused, bmax] = bfree()
+        let [sused, smax] = sfree()
         let [aused, amax] = [hused + gused + bused, hmax + gmax + bmax]
         bars.home.progress = hused / hmax
         bars.gmem.progress = gused / gmax
         bars.bmem.progress = bused / bmax
+        bars.smem.progress = sused / smax
         bars.ram.progress = aused / amax
         bars.ram.rlabel = shorten(hmax + gmax + bmax, ' GB', { precision: 0, sep: '', div: 1000 })
 
@@ -203,8 +222,9 @@ export async function main(ns) {
         bars.income.rlabel = shorten(incomePerSecond, '/sec')
         bars.xpgain.rlabel = shorten(experiencePerSecond, '/sec')
         bars.karma.rlabel = ns.heart.break()
+        bars.killed.rlabel = ns.getPlayer().numPeopleKilled
 
-        var [rep, goal, info] = getWorkingFactionInfo(ns);
+        var [rep, goal, info] = getWorkingFactionInfo();
         bars.workingFaction.progress = rep / goal;
         bars.workingFaction.rlabel = info;
 

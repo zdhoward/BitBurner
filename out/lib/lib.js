@@ -9,7 +9,7 @@ export var allServers = ["ecorp", "megacorp", "b-and-a", "blade", "nwo", "clarki
     "crush-fitness", "iron-gym", "millenium-fitness", "powerhouse-fitness", "snap-fitness",
     "run4theh111z", "I.I.I.I", "avmnite-02h", ".", "CSEC", "The-Cave", "w0r1d_d43m0n"]
 
-export var pservPrefixes = ['BOT', 'home'];
+export var pservPrefixes = ['BOT', 'SHR', 'home'];
 
 export var PASS = "✔";
 export var FAIL = "✘";
@@ -18,6 +18,7 @@ export var FAIL = "✘";
 
 export var MASTERMIND_PORT = 20;
 export var STOCKS_PORT = 19;
+export var UPGRADES_PORT = 18;
 
 /** @param {import("../../.").NS } ns */
 export function main(ns) {
@@ -40,6 +41,18 @@ export function getBotnet(ns) {
         }
     }
     return botnet;
+}
+
+/** @param {import("../../.").NS } ns **/
+export function getSharenet(ns) {
+    var purchasedServers = ns.getPurchasedServers();
+    var sharenet = [];
+    for (var i = 0; i < purchasedServers.length; i++) {
+        if (purchasedServers[i].startsWith('SHR')) {
+            sharenet.push(purchasedServers[i]);
+        }
+    }
+    return sharenet;
 }
 
 /** @param {import("../../.").NS } ns
@@ -131,7 +144,9 @@ export function pad(msg, size) {
     return msg;
 }
 
-/** @param {import("../../.").NS } ns **/
+/** @param {import("../../.").NS } ns 
+ *  @param script
+ *  @param server='home' **/
 export async function runRemoteScript(ns, script, server = 'home') {
     await ns.scriptKill(script, server);
     if (server != 'home') {
@@ -144,4 +159,46 @@ export async function runRemoteScript(ns, script, server = 'home') {
     }
 
     //await ns.sleep(10);
+}
+
+/** @param {import("../../.").NS } ns **/
+export async function shareFill(ns) {
+    var servers = allServers;
+    //servers = servers.concat(getBotnet(ns)).concat(getSharenet(ns)).push('home');
+    servers = servers.concat(getBotnet(ns));
+    servers = servers.concat(getSharenet(ns));
+    servers.push('home');
+    //ns.tprint("Servers: " + servers);
+
+    for (var i = 0; i < servers.length; i++) {
+        if (ns.serverExists(servers[i])) {
+            var server = servers[i];
+
+            ns.scriptKill('/bin/mastermind-payload.js', server);
+            ns.scriptKill('/mini/share.js', server);
+            var maxRam = ns.getServerMaxRam(server);
+
+            if (maxRam > 0) {
+                var usedRam = ns.getServerUsedRam(server);
+                var payloadRam = ns.getScriptRam('/mini/share.js', server);
+
+                var availableRam = maxRam - usedRam;
+                var threads = Math.floor(availableRam / payloadRam);
+
+                var sharePower = ns.getSharePower();
+
+                //ns.tprint(threads + " threads available");
+                //ns.tprint("Share power mult: " + ((CalculateShareMult(sharePower) - 1) * 100).toFixed(2) + "%");
+                //ns.tprint("Total Power mult: " + ((CalculateShareMult(sharePower * threads) - 1) * 100).toFixed(2) + "%");
+
+                ns.exec('/mini/share.js', server, threads);
+            }
+        }
+    }
+}
+
+export function CalculateShareMult(power) {
+    const x = 1 + Math.log(power) / (8 * Math.log(1000));
+    if (isNaN(x) || !isFinite(x)) return 1;
+    return x;
 }

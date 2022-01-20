@@ -1,4 +1,4 @@
-import { printBanner, deserializeDict, zfill, pad, waitRandom, getBotnet } from '/lib/lib.js';
+import { printBanner, deserializeDict, zfill, pad, waitRandom, getBotnet, getSharenet, runRemoteScript } from '/lib/lib.js';
 
 //var targets;
 //var hosts;
@@ -6,7 +6,7 @@ import { printBanner, deserializeDict, zfill, pad, waitRandom, getBotnet } from 
 var PAYLOAD = '/bin/mastermind-payload.js';
 var totalPayloads = 0;
 
-var files = ['/bin/mastermind-payload.js', '/lib/lib.js'];
+var files = ['/bin/mastermind-payload.js', '/lib/lib.js', '/mini/share.js'];
 
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
@@ -21,7 +21,19 @@ export async function main(ns) {
 
     await deployToTargets(ns, hosts, targets);
 
+    await deploySharenet(ns);
+
     ns.tprint("COMPLETE");
+}
+
+/** @param {import("../../.").NS } ns **/
+async function deploySharenet(ns) {
+    var sharenet = getSharenet(ns);
+    for (var i = 0; i < sharenet.length; i++) {
+        ns.scriptKill('/mini/share.js', sharenet[i]);
+        var payloads = getPayloadAmt(ns, '/mini/share.js', sharenet[i]);
+        ns.exec('/mini/share.js', sharenet[i], payloads);
+    }
 }
 
 /** @param {import("../../.").NS } ns **/
@@ -37,14 +49,15 @@ async function deployToTargets(ns, hosts, targets) {
     for (var i = 0; i < hosts.length; i++) {
         if (ns.serverExists(hosts[i])) {
             await ns.scriptKill(PAYLOAD, hosts[i]);
+            await ns.scriptKill('/mini/share.js', hosts[i]);
         }
     }
 
     ns.tprint("Deploying " + PAYLOAD + " to " + hosts.length + " hosts...");
     for (var server in targets) {
-        if (ns.serverExists(server)) {
+        if (ns.serverExists(server) && ns.hasRootAccess(server)) {
             for (var i = 0; i < hosts.length; i++) {
-                var payloadAmt = getPayloadAmt(ns, hosts[i]);
+                var payloadAmt = getPayloadAmt(ns, PAYLOAD, hosts[i]);
                 if (!fullyAssignedServers.includes(hosts[i]) && payloadAmt > 0) {
                     if (payloadAmt <= targets[server]) {
                         targets[server] -= payloadAmt;
@@ -79,7 +92,7 @@ async function deployToTargets(ns, hosts, targets) {
     ns.tprint("Distributing remaining payloads in train mode...");
 
     for (var i = 0; i < hosts.length; i++) {
-        var payloadAmt = getPayloadAmt(ns, hosts[i]);
+        var payloadAmt = getPayloadAmt(ns, PAYLOAD, hosts[i]);
         payloadAmt = Math.floor(payloadAmt / targets.length);
         //while (payloadAmt) > 0) {
         //ns.tprint('WARN - ' + hosts[i] + ': has ram left for ' + payloadAmt + ' payloads for each target (' + targets.length + ' targets)');
@@ -104,7 +117,9 @@ async function deployToTargets(ns, hosts, targets) {
  *  @param 2 payloadAmt
  */
 async function deploy(ns, host, target, payloadAmt, mode = 'normal') {
-    await ns.scp(files, 'home', host);
+    if (host != 'home') {
+        await ns.scp(files, 'home', host);
+    }
     if (payloadAmt > 0) {
         await ns.exec(PAYLOAD, host, payloadAmt, target, mode);
         //if (mode == 'normal') {
@@ -121,14 +136,14 @@ async function deploy(ns, host, target, payloadAmt, mode = 'normal') {
  *  @param 0 target
  *  @return payloadAmt
  */
-function getPayloadAmt(ns, host) {
+function getPayloadAmt(ns, payload, host) {
     var reserveRam = 0;
     if (host == 'home') {
-        reserveRam = ns.getScriptRam('/wm/wintermute-recon.js') + ns.getScriptRam('/wm/wintermute-deploy.js') + ns.getScriptRam('/bin/extend-status-overlay.js'); // TODO: needs to scale better (no augments needs very low amounts)
+        reserveRam = 16;//ns.getScriptRam('/wm/wintermute-recon.js') + ns.getScriptRam('/wm/wintermute-deploy.js') + ns.getScriptRam('/bin/extend-status-overlay.js'); // TODO: needs to scale better (no augments needs very low amounts)
     }
 
     var freeRam = ns.getServerMaxRam(host) - ns.getServerUsedRam(host) - reserveRam;
-    var payloadAmt = Math.floor(freeRam / ns.getScriptRam(PAYLOAD));
+    var payloadAmt = Math.floor(freeRam / ns.getScriptRam(payload));
 
     return payloadAmt;
 }

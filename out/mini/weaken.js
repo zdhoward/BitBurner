@@ -4,6 +4,7 @@ export function autocomplete(data, args) {
 
 /** @param {import("../../.").NS } ns **/
 export async function main(ns) {
-    await ns.sleep(args[1]);
-    ns.weaken(ns.args[0]);
+    await ns.sleep(ns.args[1]);
+    await ns.weaken(ns.args[0]);
+    //ns.tprint('WEAKEN');
 }

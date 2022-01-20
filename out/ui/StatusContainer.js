@@ -20,8 +20,8 @@ const CONTAINER_MOUNTS = {
             // The stats pane is a 2 column wide table, so we clone the charisma row and insert
             //  the clone after it.  Inside the row we create a td node spanning both columns and
             //  stick the container div inside that.
-            //let charismaRow = doc.querySelector("#root > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation1 > div > div > div > table > tbody > tr:nth-child(15)")
-            let charismaRow = doc.getElementById('overview-extra-hook-0').parentNode.parentNode;
+            let charismaRow = doc.querySelector("#root > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation1 > div > div > div > table > tbody > tr:nth-child(15)")
+            //let charismaRow = doc.getElementById('overview-extra-hook-0').parentNode.parentNode;
             let clonedRow = charismaRow.cloneNode()
             let th = doc.createElement('td')
             th.colSpan = "2"
