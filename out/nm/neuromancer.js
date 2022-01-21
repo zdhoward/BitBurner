@@ -16,37 +16,51 @@ var banner = "";
 
 /** @param {import("../../.").NS } ns */
 export async function main(ns) {
+    ns.tprint("NEUROMANCER STARTING");
+    ns.disableLog("ALL");
     visited = {};
     let hosts = getHosts(ns);
     let targets = await getTargets(ns);
 
     let threadRatios = { 'weaken': 3, 'grow': 10, 'hack': 1 };
-    let threadsPerBatch = threadRatios['weaken'] + threadRatios['grow'] + threadRatios['hack'];
     let ramPerBatch = (ns.getScriptRam('/mini/weaken.js') * threadRatios['weaken']) + (ns.getScriptRam('/mini/grow.js') * threadRatios['grow']) + (ns.getScriptRam('/mini/hack.js') * threadRatios['hack']);
 
     while (true) {
-        let target = findBestTarget();
+        let target = findBestTarget(hosts);
 
         //ns.tprint('NEUROMANCER - ');
+        //ns.tprint("RETURNED: " + target);
+
         if (target) {
             for (let h = 0; h < hosts.length; h++) {
                 let host = hosts[h];
+
+                //ns.tprint("CHECKING " + host + " FOR " + target);
 
                 let ram = ns.getServerMaxRam(host) - ns.getServerUsedRam(host);
                 if (host == 'home')
                     ram -= reserveRam;
 
                 while (ram > ramPerBatch) {
-                    ram -= ramPerBatch;
-                    deployBatch(target);
+                    // too many batches at a certain point, need to thread them up to max server drain from one hack cycle
+                    if (ram > ramPerBatch * 5) {
+                        ram -= ramPerBatch * 5;
+                        deployBatch(target, 5);
+                    } else if (ram > ramPerBatch * 3) {
+                        ram -= ramPerBatch * 3;
+                        deployBatch(target, 3);
+                    } else {
+                        ram -= ramPerBatch;
+                        deployBatch(target);
+                    }
                     await ns.sleep(300);
                 }
             }
         }
-        await ns.sleep(1000);
+        await ns.sleep(3000);
     }
 
-    function deployBatch(target) {
+    function deployBatch(target, threads = 1) {
         let cycleOffset = 100; // in ms
         let weakenTime = Math.ceil(ns.getWeakenTime(target));
         let growTime = Math.ceil(ns.getGrowTime(target));
@@ -66,60 +80,67 @@ export async function main(ns) {
         //ns.tprint("HACK TIME:   \t" + hackTime + " HACK WAIT:   \t" + hackWait + "ms" + " HACK TOTAL:   \t" + (hackTime + hackWait) + "ms");
 
         for (var i = 0; i < threadRatios['weaken']; i++) {
-            deployWeaken(target, weakenWait);
+            deployWeaken(target, weakenWait, threads);
         }
         for (var i = 0; i < threadRatios['grow']; i++) {
-            deployGrow(target, growWait);
+            deployGrow(target, growWait, threads);
         }
         for (var i = 0; i < threadRatios['hack']; i++) {
-            deployHack(target, hackWait);
+            deployHack(target, hackWait, threads);
         }
     }
 
-    function deployWeaken(target, offset = 0) {
-        ns.run('/mini/weaken.js', 1, target, offset, crypto.randomUUID());
+    function deployWeaken(target, offset = 0, threads = 1) {
+        ns.run('/mini/weaken.js', threads, target, offset, crypto.randomUUID());
     }
 
-    function deployGrow(target, offset = 0) {
-        ns.run('/mini/grow.js', 1, target, offset, crypto.randomUUID());
+    function deployGrow(target, offset = 0, threads = 1) {
+        ns.run('/mini/grow.js', threads, target, offset, crypto.randomUUID());
     }
 
-    function deployHack(target, offset = 0) {
-        ns.run('/mini/hack.js', 1, target, offset, crypto.randomUUID());
+    function deployHack(target, offset = 0, threads = 1) {
+        ns.run('/mini/hack.js', threads, target, offset, crypto.randomUUID());
     }
 
-    function findBestTarget() {
+    function findBestTarget(hosts) {
+        //ns.tprint("HOSTS: " + hosts);
+        //ns.tprint("Finding Best Target");
         let bestTarget = "joesguns";
         let bestValue = 0;
         for (var t = 0; t < targets.length; t++) {
             let target = targets[t];
             if (ns.getHackingLevel() > ns.getServerRequiredHackingLevel(target) && ns.hasRootAccess(target) && ns.getServerMaxMoney(target) > 0) {
                 bestTarget = target;
-                bestValue = ns.hackAnalyze(target);
+                bestValue = ns.getServerMaxMoney(target) / ns.getServerMinSecurityLevel(target); //ns.hackAnalyze(target);
                 // THIS SHOULD BE TESTED MORE TO FIND A BETTER WAY TO PICK THE BEST TARGET
             }
         }
 
-        // IF SERVER SEC IS TOO HIGH, BLAST IT
-        if (ns.getServerSecurityLevel(bestTarget) > ns.getServerMinSecurityLevel(bestTarget) * 1.1) {
-            var ram = ns.getServerMaxRam(bestTarget) - ns.getServerUsedRam(bestTarget) - reserveRam;
-            var scriptRam = ns.getScriptRam('/mini/weaken.js');
-            while (ram > scriptRam) {
-                deployWeaken(bestTarget);
-                ram -= scriptRam;
-            }
-            return false;
-        }
+        //ns.tprint("FINDING..." + bestTarget + " WITH VALUE " + bestValue);
 
-        // IF SERVER MONEY IS TOO LOW, BLAST IT
-        if (ns.getServerMoneyAvailable(bestTarget) < ns.getServerMaxMoney(bestTarget) * 0.9) {
-            var ram = ns.getServerMaxRam(bestTarget) - ns.getServerUsedRam(bestTarget) - reserveRam;
-            var scriptRam = ns.getScriptRam('/mini/grow.js');
-            while (ram > scriptRam) {
-                deployGrow(bestTarget);
-                ram -= scriptRam;
+        for (var h = 0; h < hosts.length; h++) {
+            let host = hosts[h];
+            // IF SERVER SEC IS TOO HIGH, BLAST IT
+            if (ns.getServerSecurityLevel(bestTarget) > ns.getServerMinSecurityLevel(bestTarget) * 1.25) {
+                var ram = ns.getServerMaxRam(host) - ns.getServerUsedRam(host) - reserveRam;
+                var scriptRam = ns.getScriptRam('/mini/weaken.js');
+                var threads = Math.floor(ram / scriptRam);
+                if (threads > 0) {
+                    deployWeaken(bestTarget, 0, threads);
+                    return false;
+                }
             }
-            return false;
+
+            // IF SERVER MONEY IS TOO LOW, BLAST IT
+            if (ns.getServerMoneyAvailable(bestTarget) < ns.getServerMaxMoney(bestTarget) * 0.75) {
+                var ram = ns.getServerMaxRam(host) - ns.getServerUsedRam(host) - reserveRam;
+                var scriptRam = ns.getScriptRam('/mini/grow.js');
+                var threads = Math.floor(ram / scriptRam);
+                if (threads > 0) {
+                    deployGrow(bestTarget, 0, threads);
+                    return false;
+                }
+            }
         }
 
         return bestTarget;

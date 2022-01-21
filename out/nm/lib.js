@@ -148,6 +148,8 @@ export async function serverScanRecursive(ns, hostname) {
 
     visited[hostname] = true;
 
+    root(ns, hostname);
+
     let remoteHosts = ns.scan(hostname);
     for (let i in remoteHosts) {
         let remoteHost = remoteHosts[i];
