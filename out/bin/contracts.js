@@ -70,16 +70,18 @@ function displayContractInfo(ns, contract, type, description, triesRemaining, da
 function solveContract(ns, contract, server) {
     var solvedTypes = ["Find Largest Prime Factor",
         "Subarray with Maximum Sum",
+        "Total Ways to Sum",
+        "Spiralize Matrix",
+        "Array Jumping Game",
+        "Merge Overlapping Intervals",
         "Generate IP Addresses",
-        "Unique Paths in a Grid I",
         "Algorithmic Stock Trader I",
         "Algorithmic Stock Trader II",
-        //"Algorithmic Stock Trader III",
-        "Array Jumping Game",
-        "Sanitize Parentheses in Expression",
-        "Total Ways to Sum",
-        "Merge Overlapping Intervals",
-        "Spiralize Matrix"
+        "Algorithmic Stock Trader III",
+        "Algorithmic Stock Trader IV",
+        "Unique Paths in a Grid I",
+        "Unique Paths in a Grid II",
+        "Sanitize Parentheses in Expression"
     ];
     var type = ns.codingcontract.getContractType(contract, server);
     var description = ns.codingcontract.getDescription(contract, server);
@@ -91,6 +93,7 @@ function solveContract(ns, contract, server) {
     ns.print('=========== ' + contract + ' ==========');
     ns.print('== TYPE            : ' + type);
     ns.print('== DATA            : ' + data);
+    //ns.alert(data);
 
     if (solvedTypes.includes(type)) { //&& triesRemaining >= 1) {
         // Solve
@@ -102,7 +105,7 @@ function solveContract(ns, contract, server) {
                 result = tryAttempt(ns, uniquePathsI, contract, data, server);
                 break;
             case "Unique Paths in a Grid II":
-                ns.print('== TODO - ' + type);
+                result = tryAttempt(ns, uniquePathsII, contract, data, server);
                 break;
             case "Algorithmic Stock Trader I":
                 result = tryAttempt(ns, algorithmicStockTraderI, contract, data, server);
@@ -114,7 +117,7 @@ function solveContract(ns, contract, server) {
                 result = tryAttempt(ns, algorithmicStockTraderIII, contract, data, server);
                 break;
             case "Algorithmic Stock Trader IV":
-                // var data = 7,55,139,173,185,81,12,59,40,97,154,20,170,17,57,40,148,118,43,39
+                result = tryAttempt(ns, algorithmicStockTraderIV, contract, data, server);
                 ns.print('== TODO - ' + type);
                 break;
             case "Minimum Path Sum in a Triangle":
@@ -129,22 +132,6 @@ function solveContract(ns, contract, server) {
                 // var data = 466303594639,24
                 //ns.print('\nType: ' + type + '\nNumTriesRemaining: ' + triesRemaining + '\nDescription: ' + description);
                 ns.print('== TODO - ' + type);
-                /*
-                Description: You are given the following string which contains only digits between 0 and 9:
-	
-                223309565
-	
-                You are also given a target number of -27. Return all possible ways you can add the +, -, and * operators to the string such that it evaluates to the target number.
-	
-                The provided answer should be an array of strings containing the valid expressions. The data provided by this problem is an array with two elements. The first element is the string of digits, while the second element is the target number:
-	
-                ["223309565", -27]
-	
-                NOTE: Numbers in the expression cannot have leading 0's. In other words, "1+01" is not a valid expression Examples:
-	
-                Input: digits = "123", target = 6
-                Output: [1+2+3, 1*2*3]
-                */
                 break;
             case "Sanitize Parentheses in Expression":
                 result = tryAttempt(ns, sanitizeParenthesis, contract, data, server);
@@ -157,7 +144,6 @@ function solveContract(ns, contract, server) {
                 ns.print('== TODO - ' + type);
                 break;
             case "Merge Overlapping Intervals":
-                // var data = 16,22,15,17,22,26,4,13,4,5,11,19,21,30,21,24,15,18,8,17,20,25,25,35,6,11,24,33
                 result = tryAttempt(ns, mergeOverlappingIntervals, contract, data, server);
                 break;
             case "Array Jumping Game":
@@ -316,53 +302,53 @@ function arrayJumpingGame(data) {
     return result
 }
 
-/** @param 0 array of prices to solve for **/
-function algorithmicStockTraderI(data) {
-    var prices = data;
-    var bestProfit = 0;
-    for (var start = 0; start < prices.length; start++) {
-        for (var end = start + 1; end < prices.length; end++) {
-            var profit = prices[end] - prices[start];
-            if (profit > bestProfit) {
-                bestProfit = profit;
+function stockSolver(prices, tx) {
+    if (tx == Infinity)
+        tx = prices.length;
+
+    function maxProfit(price, n, k) {
+        let profit = Array(k + 1).fill(0).map(x => Array(n + 1).fill(0));
+        for (let i = 0; i <= k; i++)
+            profit[i][0] = 0;
+
+        for (let j = 0; j <= n; j++)
+            profit[0][j] = 0;
+
+        for (let i = 1; i <= k; i++) {
+            for (let j = 1; j < n; j++) {
+                let max = 0;
+                for (let m = 0; m < j; m++)
+                    max = Math.max(max, price[j] - price[m] + profit[i - 1][m]);
+
+                profit[i][j] = Math.max(profit[i][j - 1], max);
             }
         }
+        return profit[k][n - 1];
     }
-    return bestProfit;
+
+    return maxProfit(prices, prices.length, tx);
+}
+
+/** @param 0 array of prices to solve for **/
+function algorithmicStockTraderI(data) {
+    return stockSolver(data, 1);
 }
 
 /** @param 0 array of prices to solve for **/
 function algorithmicStockTraderII(data) {
-    var totalProfits = 0;
-    for (var start = 0; start < data.length; start++) {
-        for (var end = start + 1; end < data.length; end++) {
-            var profit = data[end] - data[start];
-            var lastProfit = data[end - 1] - data[start];
-
-            if (profit < lastProfit) {
-                if (lastProfit > 0) {
-                }
-                start = end - 1;
-                totalProfits += lastProfit;
-                break;
-            }
-
-            if (end == data.length - 1) {
-                start = end;
-                totalProfits += profit;
-                break;
-            }
-        }
-    }
-    return totalProfits;
+    return stockSolver(data, Infinity);
 }
 
 /** @param 0 array of prices to solve for **/
 function algorithmicStockTraderIII(data) {
-    var transactions = algorithmicStockSolver(data);
-    var bestProfit = data[transactions[0][1]] - data[transactions[0][0]];
-    bestProfit += data[transactions[1][1]] - data[transactions[1][0]];
-    return bestProfit
+    return stockSolver(data, 2);
+}
+
+/** @param 0 array of num of transactions and prices to solve for **/
+function algorithmicStockTraderIV(data) {
+    var tx = data[0];
+    var prices = data[1];
+    return stockSolver(prices, tx);
 }
 
 /** @param 0 array of [x,y] to solve for **/
@@ -387,6 +373,26 @@ function uniquePathsI(input) {
     var rootPath = "R".repeat(input[0] - 1) + "D".repeat(input[1] - 1);
     var result = findUniquePermutations(rootPath).length;
     return result;
+}
+
+function uniquePathsII(grid) {
+    let dirs = [[0, 1], [1, 0]]; // only down or right
+    let totalPaths = 0;
+    function pathfind(x, y) {
+        if (x < grid[0].length && y < grid.length) { // if within bounds
+            if (grid[y][x] != 1) { // if not a wall
+                if (x == grid[0].length - 1 && y == grid.length - 1) { // if at ending point
+                    totalPaths++;
+                } else { // else continue pathfinding
+                    for (var i = 0; i < dirs.length; i++) {
+                        pathfind(x + dirs[i][0], y + dirs[i][1]);
+                    }
+                }
+            }
+        }
+    }
+    pathfind(0, 0);
+    return totalPaths;
 }
 
 /** @param 0 number to solve for **/

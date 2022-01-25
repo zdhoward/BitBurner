@@ -1,4 +1,5 @@
 import { STOCKS_PORT, runRemoteScript, UPGRADES_PORT, shareFill } from "/lib/lib.js";
+import { purchaseNewAttackBot } from "/nm/lib.js";
 
 /** @param {import("../../.").NS } ns */
 export async function main(ns) {
@@ -44,6 +45,15 @@ export async function main(ns) {
     async function startUpgrading() {
         ns.tprint("START UPGRADING");
         await ns.writePort(UPGRADES_PORT, "START");
+    }
+
+    function purchaseHomeExtrasServer() {
+        if (!ns.serverExists('home-extras')) {
+            // attempt to purchase a server for 128GB
+            if (!ns.serverExists('home-extras') && ns.getPlayer().money > ns.getPurchasedServerCost(128)) {
+                ns.purchaseServer('home-extras', 128);
+            }
+        }
     }
 
     function buyPrograms() {
@@ -111,6 +121,25 @@ export async function main(ns) {
         */
     }
 
+    function loadUI() {
+        ns.scriptKill("/ui/extend-basic-5.5GB.js", "home");
+        ns.scriptKill("/ui/extend-stocks-14GB.js", "home");
+        ns.scriptKill("/ui/extend-factions-30GB.js", "home");
+
+        var freeRam = ns.getServerMaxRam('home') - ns.getServerUsedRam('home');
+
+        if (false) { //freeRam > 30) { // currently requires 230GB, unrealistically high
+            ns.exec("/ui/extend-factions-30GB.js", "home");
+        } else if (freeRam > 14) {
+            ns.exec("/ui/extend-stocks-14GB.js", "home");
+        } else if (freeRam > 5.5) {
+            ns.exec("/ui/extend-basic-5.5GB.js", "home");
+        } else {
+            ns.tprint("NOT ENOUGH RAM TO LOAD UI");
+        }
+
+    }
+
     var opts = parseArgs();
     //ns.tprint(opts);
 
@@ -124,6 +153,9 @@ export async function main(ns) {
                         break;
                     case "stop":
                         await stopBuyingStocks();
+                        break;
+                    case "deploy":
+                        await runRemoteScript(ns, '/bin/stocks.js', 'home-extras');
                         break;
                     default:
                         ns.tprint("Unknown stocks option: " + opts[key]);
@@ -139,13 +171,15 @@ export async function main(ns) {
                     case "stop":
                         await stopUpgrading();
                         break;
+                    case "deploy":
+                        await runRemoteScript(ns, '/bin/upgrades.js', 'home-extras');
                     default:
                         ns.tprint("Unknown upgrades option: " + opts[key]);
                         break;
                 }
                 break;
             case "help":
-                ns.tprint("INFO - HELP\n\tcmdr !command argument --flag\n\t!stocks\t\t[start|stop]\n\t!upgrades\t[start|stop]\n\t--work\t\t-> Reload work.js\n\t--ui\t\t-> Reload ui.js\n\t--contracts\t-> Reload contracts.js\n\t--share\t\t-> Dedicate all servers to sharing\n\t--buy\t\t-> Buy Programs");
+                ns.tprint("INFO - HELP\n\tcmdr !command argument --flag\n\t!stocks\t\t[start|stop|deploy]\n\t!upgrades\t[start|stop|deploy]\n\t--work\t\t-> Reload work.js\n\t--ui\t\t-> Reload ui.js\n\t--contracts\t-> Reload contracts.js\n\t--share\t\t-> Dedicate all servers to sharing\n\t!buy\t\t[bot|home-extras]\t\t-> Buy Programs");
                 break;
             case "work":
                 await runRemoteScript(ns, '/bin/work.js', 'home-extras');
@@ -154,13 +188,24 @@ export async function main(ns) {
                 await runRemoteScript(ns, '/bin/contracts.js', 'home-extras');
                 break;
             case "ui":
-                await runRemoteScript(ns, '/bin/extend-status-overlay.js');
+                loadUI();
                 break;
             case "share":
                 await shareFill(ns);
                 break;
             case "buy":
-                buyPrograms();
+            case "b":
+                switch (opts[key]) {
+                    case "bot":
+                        await purchaseNewAttackBot(ns);
+                        break;
+                    case "home-extras":
+                        purchaseHomeExtrasServer();
+                        break;
+                    default:
+                        ns.tprint("Unknown buy option: " + opts[key]);
+                        break;
+                }
                 break;
             default:
                 ns.tprint("Unknown module: " + key);

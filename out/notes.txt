@@ -1,0 +1,3 @@
+
+// BUY WHAT WE NEED FROM TOR
+buy BruteSSH.exe; buy FTPCrack.exe; buy relaySMTP.exe; buy HTTPWorm.exe; buy SQLInject.exe; buy DeepscanV1.exe; buy DeepscanV2.exe; buy AutoLink.exe

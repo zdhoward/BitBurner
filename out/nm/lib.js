@@ -5,17 +5,22 @@ var visited = {};
 
 /** @param {import("../../.").NS } ns */
 export function getHosts(ns) {
-    let hosts = [];
+    let hosts = ['home'];
     hosts = hosts.concat(getBots(ns));
-    hosts.push('home');
+    //hosts.push('home');
     return hosts;
 }
 
 /** @param {import("../../.").NS } ns **/
 export function getBots(ns) {
-    let purchasedServers = ns.getPurchasedServers();
-    let botnet = [];
-    for (let i = 0; i < purchasedServers.length; i++) {
+    return getBotnet(ns);
+}
+
+/** @param {import("../../.").NS } ns **/
+export function getBotnet(ns) {
+    var purchasedServers = ns.getPurchasedServers();
+    var botnet = [];
+    for (var i = 0; i < purchasedServers.length; i++) {
         if (purchasedServers[i].startsWith('BOT')) {
             botnet.push(purchasedServers[i]);
         }
@@ -190,4 +195,132 @@ export function openPorts(ns, server) {
             portOpener.fn(server);
         }
     });
+}
+
+/** @param {import("../../.").NS } ns **/
+export async function purchaseNewAttackBot(ns) {
+    if (ns.getPurchasedServers().length < ns.getPurchasedServerLimit() && ns.getPlayer().money > 58000000000) {
+        var ramSize = getNewServerSize(ns, ns.getPurchasedServerMaxRam(), ns.getPlayer().money);
+        var cost = ns.getPurchasedServerCost(ramSize);
+
+        var name = getNewBotName(ns, 'BOT', getBotnet(ns));
+
+
+        if (ns.purchaseServer(name, ramSize)) {
+            ns.tprint('INFO - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(cost));
+            await ns.scp('/mini/hack.js', 'home', name);
+            await ns.scp('/mini/grow.js', 'home', name);
+            await ns.scp('/mini/weaken.js', 'home', name);
+            await ns.scp('/mini/share.js', 'home', name);
+        } else { ns.tprint('ERROR - ' + 'PURCHASING ' + name + ': ' + ramSize + ' for ' + formatMoney(cost)); }
+    } else {
+        ns.tprint("NOT ENOUGH MONEY OR SERVER LIMIT REACHED");
+    }
+}
+
+/** @param {import("../../.").NS } ns 
+ *  @param 0 ramSize
+ *  @return max purchasable ramSize
+ */
+export function getNewServerSize(ns, ramSize, money) {
+    var cost = ns.getPurchasedServerCost(ramSize);
+    if (cost > money) {
+        ramSize = getNewServerSize(ns, ramSize / 2, money);
+    }
+
+    return ramSize
+}
+
+/** @param {import("../../.").NS } ns 
+ *  @param 0 name
+ *  @return name with unique number
+ */
+export function getNewBotName(ns, name, existingNames) {
+    //var number = crypto.randomUUID();//ns.getPurchasedServers().length + 1;
+
+    var highestNumber = 1;
+    for (var i = 0; i < existingNames.length; i++) {
+        var num = Number(existingNames[i].split('-')[1]);
+
+        if (num > highestNumber) {
+            highestNumber = num;
+        }
+    }
+    highestNumber = Number(highestNumber) + 1;
+    var name = name + "-" + highestNumber;
+    ns.tprint("FINAL NAME: " + name);
+
+    return name;
+}
+
+/** @param {import("../../.").NS } ns
+ *  @param 0 money
+ *  @return formattedMoney
+ */
+export function formatMoney(money, precision = 2) {
+    return formatNumber(money, precision);
+}
+
+/** @param {number} number
+ *  @param {string} suffix
+ *  @param {number} precision
+ *  @param {string} seperator
+ *  @return formattedMoney
+ */
+export function formatNumber(number, suffix = '', precision = 2, sep = '') {
+    const div = 1000;
+    const labels = ['', 'k', 'm', 'b', 't', 'q'];
+    for (var n = 0; Math.abs(number) > div; n++) { number /= div };
+    return `${number.toFixed(precision)}${sep}${labels[n]}${suffix}`;
+}
+
+export function printRainbow(text) {
+    let doc = eval('document');
+    const list = doc.getElementById("terminal");
+
+    if (list != null) {
+
+        let style = `@keyframes rainbow {
+        0% {color:purple}
+        12.5% {color:cyan}
+        50% {color:yellow}
+        87.5% {color:cyan}
+        100% {color:purple}
+    }
+    .rainbow {
+        animation-name: rainbow;
+        animation-duration: 3s;
+        animation-iteration-count: infinite;
+    }
+        `;
+
+        style = `.rainbow {
+        /* text-align: center; /*
+        /* text-decoration: underline; */
+        font-size: 18px;
+        font-family: monospace;
+        letter-spacing: -1px;
+    }
+    .rainbow_text_animated {
+        background: linear-gradient(to right, #6666ff, #0099ff , #00ff00, #ff3399, #6666ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: rainbow_animation 6s ease-in-out infinite;
+        background-size: 400% 100%;
+    }
+    
+    @keyframes rainbow_animation {
+        0%,100% {
+            background-position: 0 0;
+        }
+    
+        50% {
+            background-position: 100% 0;
+        }
+    }`;
+
+        // Inject some HTML.
+        list.insertAdjacentHTML('beforeend', `<style>${style}</style><li class = "rainbow"><p class ="jss778 MuiTypography-root MuiTypography-body1 css-12bw0zz"><pre class="rainbow rainbow_text_animated">${text}</pre></p></li>`);
+    }
 }
