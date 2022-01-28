@@ -58,7 +58,16 @@ export async function main(ns) {
 
                     while (ram > ramPerBatch) {
                         // too many batches at a certain point, need to thread them up to max server drain from one hack cycle
-                        if (ram > ramPerBatch * 50) {
+                        if (ram > ramPerBatch * 500) {
+                            ram -= ramPerBatch * 500;
+                            deployBatch(host, target, 500);
+                        } else if (ram > ramPerBatch * 250) {
+                            ram -= ramPerBatch * 250;
+                            deployBatch(host, target, 250);
+                        } else if (ram > ramPerBatch * 100) {
+                            ram -= ramPerBatch * 100;
+                            deployBatch(host, target, 100);
+                        } else if (ram > ramPerBatch * 50) {
                             ram -= ramPerBatch * 50;
                             deployBatch(host, target, 50);
                         } else if (ram > ramPerBatch * 25) {
@@ -94,6 +103,8 @@ export async function main(ns) {
 
         let batchTime = weakenTime;
 
+        let iterationsToRun = 10;
+
         let growWait = Math.ceil(batchTime - growTime - cycleOffset);
         let weakenWait = 0;
         let hackWait = Math.ceil(batchTime - hackTime + cycleOffset);
@@ -106,32 +117,32 @@ export async function main(ns) {
         //ns.tprint("HACK TIME:   \t" + hackTime + " HACK WAIT:   \t" + hackWait + "ms" + " HACK TOTAL:   \t" + (hackTime + hackWait) + "ms");
 
         for (var i = 0; i < threadRatios['weaken']; i++) {
-            deployWeaken(host, target, weakenWait, threads);
+            deployWeaken(host, target, weakenWait, threads, iterationsToRun);
         }
         for (var i = 0; i < threadRatios['grow']; i++) {
-            deployGrow(host, target, growWait, threads);
+            deployGrow(host, target, growWait, threads, iterationsToRun);
         }
         for (var i = 0; i < threadRatios['hack']; i++) {
-            deployHack(host, target, hackWait, threads);
+            deployHack(host, target, hackWait, threads, iterationsToRun);
         }
     }
 
-    function deployWeaken(host, target, offset = 0, threads = 1) {
+    function deployWeaken(host, target, offset = 0, threads = 1, iterations = 1) {
         //ns.run('/mini/weaken.js', threads, target, offset, crypto.randomUUID());
         if (threads > 0)
-            ns.exec('/mini/weaken.js', host, threads, target, offset, crypto.randomUUID());
+            ns.exec('/mini/weaken.js', host, threads, target, offset, iterations, crypto.randomUUID());
     }
 
-    async function deployGrow(host, target, offset = 0, threads = 1) {
+    async function deployGrow(host, target, offset = 0, threads = 1, iterations = 1) {
         //ns.run('/mini/grow.js', threads, target, offset, crypto.randomUUID());
         if (threads > 0)
-            ns.exec('/mini/grow.js', host, threads, target, offset, crypto.randomUUID());
+            ns.exec('/mini/grow.js', host, threads, target, offset, iterations, crypto.randomUUID());
     }
 
-    async function deployHack(host, target, offset = 0, threads = 1) {
+    async function deployHack(host, target, offset = 0, threads = 1, iterations = 1) {
         //ns.run('/mini/hack.js', threads, target, offset, crypto.randomUUID());
         if (threads > 0)
-            ns.exec('/mini/hack.js', host, threads, target, offset, crypto.randomUUID());
+            ns.exec('/mini/hack.js', host, threads, target, offset, iterations, crypto.randomUUID());
     }
 
     function findBestTarget(hosts) {

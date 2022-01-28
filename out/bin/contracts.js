@@ -68,21 +68,6 @@ function displayContractInfo(ns, contract, type, description, triesRemaining, da
  *  @param 1 contract
  */
 function solveContract(ns, contract, server) {
-    var solvedTypes = ["Find Largest Prime Factor",
-        "Subarray with Maximum Sum",
-        "Total Ways to Sum",
-        "Spiralize Matrix",
-        "Array Jumping Game",
-        "Merge Overlapping Intervals",
-        "Generate IP Addresses",
-        "Algorithmic Stock Trader I",
-        "Algorithmic Stock Trader II",
-        "Algorithmic Stock Trader III",
-        "Algorithmic Stock Trader IV",
-        "Unique Paths in a Grid I",
-        "Unique Paths in a Grid II",
-        "Sanitize Parentheses in Expression"
-    ];
     var type = ns.codingcontract.getContractType(contract, server);
     var description = ns.codingcontract.getDescription(contract, server);
     var triesRemaining = ns.codingcontract.getNumTriesRemaining(contract, server);
@@ -95,68 +80,59 @@ function solveContract(ns, contract, server) {
     ns.print('== DATA            : ' + data);
     //ns.alert(data);
 
-    if (solvedTypes.includes(type)) { //&& triesRemaining >= 1) {
-        // Solve
-        switch (type) {
-            case "Find Largest Prime Factor":
-                result = tryAttempt(ns, findLargestPrimeFactor, contract, data, server);
-                break;
-            case "Unique Paths in a Grid I":
-                result = tryAttempt(ns, uniquePathsI, contract, data, server);
-                break;
-            case "Unique Paths in a Grid II":
-                result = tryAttempt(ns, uniquePathsII, contract, data, server);
-                break;
-            case "Algorithmic Stock Trader I":
-                result = tryAttempt(ns, algorithmicStockTraderI, contract, data, server);
-                break;
-            case "Algorithmic Stock Trader II":
-                result = tryAttempt(ns, algorithmicStockTraderII, contract, data, server);
-                break;
-            case "Algorithmic Stock Trader III":
-                result = tryAttempt(ns, algorithmicStockTraderIII, contract, data, server);
-                break;
-            case "Algorithmic Stock Trader IV":
-                result = tryAttempt(ns, algorithmicStockTraderIV, contract, data, server);
-                ns.print('== TODO - ' + type);
-                break;
-            case "Minimum Path Sum in a Triangle":
-                // var data = 9,5,4,8,9,5,4,5,6,8,8,7,8,7,4
-                ns.print('== TODO - ' + type);
-                break;
-            case "Subarray with Maximum Sum":
-                result = tryAttempt(ns, subarrayWithLargestSum, contract, data, server);
-                break;
-            case "Find All Valid Math Expressions":
-                // var data = 8327,82
-                // var data = 466303594639,24
-                //ns.print('\nType: ' + type + '\nNumTriesRemaining: ' + triesRemaining + '\nDescription: ' + description);
-                ns.print('== TODO - ' + type);
-                break;
-            case "Sanitize Parentheses in Expression":
-                result = tryAttempt(ns, sanitizeParenthesis, contract, data, server);
-                break;
-            case "Generate IP Addresses":
-                result = tryAttempt(ns, generateIPs, contract, data, server);
-                break;
-            case "Spiralize Matrix":
-                result = tryAttempt(ns, spiralizeMatrix, contract, data, server);
-                ns.print('== TODO - ' + type);
-                break;
-            case "Merge Overlapping Intervals":
-                result = tryAttempt(ns, mergeOverlappingIntervals, contract, data, server);
-                break;
-            case "Array Jumping Game":
-                result = tryAttempt(ns, arrayJumpingGame, contract, data, server);
-                ns.print('== TODO - ' + type);
-                break;
-            case "Total Ways to Sum":
-                result = tryAttempt(ns, totalWaysToSum, contract, data, server);
-                break;
-            default:
-                ns.print('== NO SOLUTIONS FOR - ' + type);
-                break;
-        }
+    // Solve
+    switch (type) {
+        case "Find Largest Prime Factor":
+            result = tryAttempt(ns, findLargestPrimeFactor, contract, data, server);
+            break;
+        case "Unique Paths in a Grid I":
+            result = tryAttempt(ns, uniquePathsI, contract, data, server);
+            break;
+        case "Unique Paths in a Grid II":
+            result = tryAttempt(ns, uniquePathsII, contract, data, server);
+            break;
+        case "Algorithmic Stock Trader I":
+            result = tryAttempt(ns, algorithmicStockTraderI, contract, data, server);
+            break;
+        case "Algorithmic Stock Trader II":
+            result = tryAttempt(ns, algorithmicStockTraderII, contract, data, server);
+            break;
+        case "Algorithmic Stock Trader III":
+            result = tryAttempt(ns, algorithmicStockTraderIII, contract, data, server);
+            break;
+        case "Algorithmic Stock Trader IV":
+            result = tryAttempt(ns, algorithmicStockTraderIV, contract, data, server);
+            break;
+        case "Minimum Path Sum in a Triangle":
+            result = tryAttempt(ns, minimumPathSumForTriangle, contract, data, server);
+            break;
+        case "Subarray with Maximum Sum":
+            result = tryAttempt(ns, subarrayWithLargestSum, contract, data, server);
+            break;
+        case "Find All Valid Math Expressions":
+            result = tryAttempt(ns, findAllValidMathExpressions, contract, data, server);
+            break;
+        case "Sanitize Parentheses in Expression":
+            result = tryAttempt(ns, sanitizeParenthesis, contract, data, server);
+            break;
+        case "Generate IP Addresses":
+            result = tryAttempt(ns, generateIPs, contract, data, server);
+            break;
+        case "Spiralize Matrix":
+            result = tryAttempt(ns, spiralizeMatrix, contract, data, server);
+            break;
+        case "Merge Overlapping Intervals":
+            result = tryAttempt(ns, mergeOverlappingIntervals, contract, data, server);
+            break;
+        case "Array Jumping Game":
+            result = tryAttempt(ns, arrayJumpingGame, contract, data, server);
+            break;
+        case "Total Ways to Sum":
+            result = tryAttempt(ns, totalWaysToSum, contract, data, server);
+            break;
+        default:
+            ns.print('== NO SOLUTIONS FOR - ' + type);
+            break;
     }
 }
 
@@ -224,6 +200,33 @@ function mergeOverlappingIntervals(data) {
     return data;
 }
 
+function findAllValidMathExpressions(data) {
+    let target = data[1];
+    let values = data[0];
+    let operations = ['+', '-', '*', '/', ''];
+    let allExpressions = [];
+
+    buildExpressions(target);
+
+    return allExpressions;
+
+    function buildExpressions(target, curExpression = '', index = 0) {
+        if (index < values.length - 1) {
+            curExpression += values[index];
+            for (var o = 0; o < operations.length; o++) {
+                if (!(operations[o] == '' && values[index] == 0))
+                    buildExpressions(target, curExpression + operations[o], index + 1);
+            }
+        } else {
+            curExpression += values[values.length - 1];
+            let result = eval(curExpression);
+            if (result == target) {
+                allExpressions.push(curExpression);
+            }
+        }
+    }
+}
+
 /** @param {import("../../.").NS } ns 
  *  @param data number to solve for 
  */
@@ -247,6 +250,31 @@ function totalWaysToSum(data) {
 
     return totalWays
 }
+
+/** @param 0 array of numbers to solve for **/
+function minimumPathSumForTriangle(data) {
+    let allSums = [];
+    function findOptions(sum, row, col) {
+        if (row < data.length - 1) {
+            let sumB = null;
+            let sumA = sum + data[row + 1][col];
+            findOptions(sumA, row + 1, col);
+            if (col + 1 < data[row + 1].length) {
+                sumB = sum + data[row + 1][col + 1];
+                findOptions(sumB, row + 1, col + 1);
+            }
+        } else {
+            allSums.push(sum);
+        }
+    }
+
+    let curSum = data[0][0];
+
+    curSum = findOptions(curSum, 0, 0);
+
+    return Math.min(...allSums);
+}
+
 
 /** @param 0 array of numbers to solve for **/
 function spiralizeMatrix(data) {
@@ -415,7 +443,7 @@ function findLargestPrimeFactor(number) {
 /** @param 0 array to solve for **/
 function subarrayWithLargestSum(array) {
     var bestSubArray = [];
-    var bestSubArraySum = 0;
+    var bestSubArraySum = -Infinity;
     var subarray = [];
     for (var index = 0; index < array.length; index++) {
         for (var length = 1; length <= array.length - index; length++) {
