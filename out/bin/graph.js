@@ -25,25 +25,13 @@ export async function main(ns) {
             for (let col = 0; col < width; col++) {
                 let scale = row / height;
                 let value = data[col] / max;
-                //ns.tprint("DATA: " + data[col] + " MAX: " + max + " VALUE: " + value + " SCALE: " + scale);
-                //ns.tprint("ROW: " + row + " COL: " + col + " HEIGHT: " + height + " WIDTH: " + width);
                 if (value > scale) {
                     if (col == data.length - 1) {
                         curRow = Math.max(height - row, 1);
                         curVal = data[col];
                     }
                     let subvalue = (value - scale) * 100;
-                    //ns.tprint("SUBVALUE: " + subvalue);
                     if (subvalue > 4) {
-                        /* This currently effects the whole row, need to specify the top row of data, may need to do this separately after to smooth out the edges
-                        if (data[col - 1] / max < value && data[col + 1] / max < value && curRow == row)
-                            output += SIX;
-                        else if (data[col - 1] / max < value && curRow == row)
-                            output += SEVEN_R;
-                        else if (data[col + 1] / max < value && curRow == row)
-                            output += SEVEN_L;
-                        else
-                        */
                         output += EIGHT;
                     } else if (subvalue > 3) {
                         output += SIX;
@@ -54,25 +42,17 @@ export async function main(ns) {
                     } else {
                         output += TWO;
                     }
-                    //ns.tprint("DATA: " + data[col] + " ROW: " + row + " COL: " + col + " VALUE: " + value + " SUBVALUE: " + subvalue + " SCALE: " + scale);
-
-                    //ns.tprint("CURVAL: " + curVal + " CURROW: " + curRow);
-
                 } else {
                     output += BLANK;
                 }
-
-                //ns.tprint("DATA: " + data[col] + " COL: " + col + " VALUE: " + value);
             }
         }
         output = output.split('\n').reverse();
 
+        // SMOOTH GRAPH
         for (let col = 0; col < width; col++) {
             for (let row = 1; row < height; row++) {
                 if (output[row][col] != BLANK && output[row - 1][col] == BLANK) {
-                    //ns.tprint(output[row][col]);
-                    //ns.tprint('ROW: ' + row + ' COL: ' + col);
-                    // TIME TO SMOOTH
                     if (output[row][col] == EIGHT) {
                         if (output[row][col - 1] == BLANK && output[row][col + 1] == BLANK)
                             output[row] = output[row].replaceAt(col, SIX);
@@ -124,12 +104,8 @@ export async function main(ns) {
                                         output[row] = output[row].replaceAt(col, THREE_R);
                                 }
                 }
-                //ns.tprint('COL: ' + col + ' ROW: ' + row);
-                //ns.tprint("VALUE: " + output[row][col] + " ABOVE VALUE: " + output[row - 1][col]);
             }
         }
-
-        //ns.tprint(output);
 
         //add labels
         output[0] += " == " + formatNumber(max);
@@ -152,6 +128,7 @@ export async function main(ns) {
         ns.print(output);
     }
 
+    // INIT GRAPH //
     ns.disableLog("ALL");
 
     let graphingData = [];
@@ -165,7 +142,7 @@ export async function main(ns) {
     for (let i = 0; i < width; i++)
         graphingData.push(0);
 
-
+    // RUN GRAPH //
     while (true) {
         //graph('RNG (0-100)', Math.floor(Math.random() * 100));
         graph("Income / sec", ns.getScriptIncome()[0]);
