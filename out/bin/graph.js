@@ -116,6 +116,7 @@ export async function main(ns) {
     }
 
     function graph(title, newData) {
+        // Dynamically adjust scale
         if (newData < lowest)
             lowest = newData;
         if (newData > highest)
