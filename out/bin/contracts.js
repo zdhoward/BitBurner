@@ -1,3 +1,5 @@
+/// ALLVALIDMATHEXPRESSIONS FAILS WITH : [927046008995,-10]
+
 ////////////////////////
 // GLOBALS
 ////////////////////////
@@ -32,7 +34,7 @@ async function serverScanRecursive(ns, hostname) {
     visited[hostname] = true;
 
     //do logic
-    getContracts(ns, hostname);
+    await getContracts(ns, hostname);
 
     var remoteHosts = ns.scan(hostname);
     for (var i in remoteHosts) {
@@ -44,10 +46,10 @@ async function serverScanRecursive(ns, hostname) {
 /** @param {NS} ns
  *  @param 0 server
  */
-function getContracts(ns, server) {
+async function getContracts(ns, server) {
     var files = ns.ls(server, ".cct");
     for (var i = 0; i < files.length; i++) {
-        solveContract(ns, files[i], server);
+        await solveContract(ns, files[i], server);
     }
 }
 
@@ -67,11 +69,10 @@ function displayContractInfo(ns, contract, type, description, triesRemaining, da
  *  @param 0 server
  *  @param 1 contract
  */
-function solveContract(ns, contract, server) {
-    var type = ns.codingcontract.getContractType(contract, server);
-    var description = ns.codingcontract.getDescription(contract, server);
-    var triesRemaining = ns.codingcontract.getNumTriesRemaining(contract, server);
-    var data = ns.codingcontract.getData(contract, server);
+async function solveContract(ns, contract, server) {
+    let contracts = eval('ns.codingcontract');
+    var type = eval('contracts.getContractType(contract, server)');
+    var data = eval('contracts.getData(contract, server)');
 
     var result = false;
 
@@ -80,55 +81,57 @@ function solveContract(ns, contract, server) {
     ns.print('== DATA            : ' + data);
     //ns.alert(data);
 
+    //return;
+
     // Solve
     switch (type) {
         case "Find Largest Prime Factor":
-            result = tryAttempt(ns, findLargestPrimeFactor, contract, data, server);
+            result = await tryAttempt(ns, findLargestPrimeFactor, contract, data, server);
             break;
         case "Unique Paths in a Grid I":
-            result = tryAttempt(ns, uniquePathsI, contract, data, server);
+            result = await tryAttempt(ns, uniquePathsI, contract, data, server);
             break;
         case "Unique Paths in a Grid II":
-            result = tryAttempt(ns, uniquePathsII, contract, data, server);
+            result = await tryAttempt(ns, uniquePathsII, contract, data, server);
             break;
         case "Algorithmic Stock Trader I":
-            result = tryAttempt(ns, algorithmicStockTraderI, contract, data, server);
+            result = await tryAttempt(ns, algorithmicStockTraderI, contract, data, server);
             break;
         case "Algorithmic Stock Trader II":
-            result = tryAttempt(ns, algorithmicStockTraderII, contract, data, server);
+            result = await tryAttempt(ns, algorithmicStockTraderII, contract, data, server);
             break;
         case "Algorithmic Stock Trader III":
-            result = tryAttempt(ns, algorithmicStockTraderIII, contract, data, server);
+            result = await tryAttempt(ns, algorithmicStockTraderIII, contract, data, server);
             break;
         case "Algorithmic Stock Trader IV":
-            result = tryAttempt(ns, algorithmicStockTraderIV, contract, data, server);
+            result = await tryAttempt(ns, algorithmicStockTraderIV, contract, data, server);
             break;
         case "Minimum Path Sum in a Triangle":
-            result = tryAttempt(ns, minimumPathSumForTriangle, contract, data, server);
+            result = await tryAttempt(ns, minimumPathSumForTriangle, contract, data, server);
             break;
         case "Subarray with Maximum Sum":
-            result = tryAttempt(ns, subarrayWithLargestSum, contract, data, server);
+            result = await tryAttempt(ns, subarrayWithLargestSum, contract, data, server);
             break;
         case "Find All Valid Math Expressions":
-            result = tryAttempt(ns, findAllValidMathExpressions, contract, data, server);
+            //result = await tryAttempt(ns, findAllValidMathExpressions, contract, data, server);
             break;
         case "Sanitize Parentheses in Expression":
-            result = tryAttempt(ns, sanitizeParenthesis, contract, data, server);
+            result = await tryAttempt(ns, sanitizeParenthesis, contract, data, server);
             break;
         case "Generate IP Addresses":
-            result = tryAttempt(ns, generateIPs, contract, data, server);
+            result = await tryAttempt(ns, generateIPs, contract, data, server);
             break;
         case "Spiralize Matrix":
-            result = tryAttempt(ns, spiralizeMatrix, contract, data, server);
+            result = await tryAttempt(ns, spiralizeMatrix, contract, data, server);
             break;
         case "Merge Overlapping Intervals":
-            result = tryAttempt(ns, mergeOverlappingIntervals, contract, data, server);
+            result = await tryAttempt(ns, mergeOverlappingIntervals, contract, data, server);
             break;
         case "Array Jumping Game":
-            result = tryAttempt(ns, arrayJumpingGame, contract, data, server);
+            result = await tryAttempt(ns, arrayJumpingGame, contract, data, server);
             break;
         case "Total Ways to Sum":
-            result = tryAttempt(ns, totalWaysToSum, contract, data, server);
+            result = await tryAttempt(ns, totalWaysToSum, contract, data, server);
             break;
         default:
             ns.print('== NO SOLUTIONS FOR - ' + type);
@@ -141,7 +144,7 @@ function solveContract(ns, contract, server) {
 ////////////////////
 /** @param data number to solve for 
  */
-function mergeOverlappingIntervals(data) {
+async function mergeOverlappingIntervals(data) {
     function isValid(items) {
         var success = true;
         for (var i = 0; i < items.length; i++) {
@@ -200,7 +203,7 @@ function mergeOverlappingIntervals(data) {
     return data;
 }
 
-function findAllValidMathExpressions(data) {
+async function findAllValidMathExpressions(data) {
     let target = data[1];
     let values = data[0];
     let operations = ['+', '-', '*', '/', ''];
@@ -230,7 +233,7 @@ function findAllValidMathExpressions(data) {
 /** @param {import("../../.").NS } ns 
  *  @param data number to solve for 
  */
-function totalWaysToSum(data) {
+async function totalWaysToSum(data) {
     function breakdown(number, range) {
         var steps = Array.from({ length: number + 1 }, (_, i) => 0);
         steps[0] = 1;
@@ -252,7 +255,7 @@ function totalWaysToSum(data) {
 }
 
 /** @param 0 array of numbers to solve for **/
-function minimumPathSumForTriangle(data) {
+async function minimumPathSumForTriangle(data) {
     let allSums = [];
     function findOptions(sum, row, col) {
         if (row < data.length - 1) {
@@ -277,7 +280,7 @@ function minimumPathSumForTriangle(data) {
 
 
 /** @param 0 array of numbers to solve for **/
-function spiralizeMatrix(data) {
+async function spiralizeMatrix(data) {
     var spiralized = [];
     var direction = [[1, 0], [0, 1], [-1, 0], [0, -1]];
     var curDir = 0;
@@ -311,7 +314,7 @@ function spiralizeMatrix(data) {
 }
 
 /** @param 0 array of prices to solve for **/
-function arrayJumpingGame(data) {
+async function arrayJumpingGame(data) {
     function jump(idx, maxJump) {
         if (idx == data.length) {
             return true;
@@ -330,7 +333,7 @@ function arrayJumpingGame(data) {
     return result
 }
 
-function stockSolver(prices, tx) {
+async function stockSolver(prices, tx) {
     if (tx == Infinity)
         tx = prices.length;
 
@@ -358,29 +361,29 @@ function stockSolver(prices, tx) {
 }
 
 /** @param 0 array of prices to solve for **/
-function algorithmicStockTraderI(data) {
+async function algorithmicStockTraderI(data) {
     return stockSolver(data, 1);
 }
 
 /** @param 0 array of prices to solve for **/
-function algorithmicStockTraderII(data) {
+async function algorithmicStockTraderII(data) {
     return stockSolver(data, Infinity);
 }
 
 /** @param 0 array of prices to solve for **/
-function algorithmicStockTraderIII(data) {
+async function algorithmicStockTraderIII(data) {
     return stockSolver(data, 2);
 }
 
 /** @param 0 array of num of transactions and prices to solve for **/
-function algorithmicStockTraderIV(data) {
+async function algorithmicStockTraderIV(data) {
     var tx = data[0];
     var prices = data[1];
     return stockSolver(prices, tx);
 }
 
 /** @param 0 array of [x,y] to solve for **/
-function uniquePathsI(input) {
+async function uniquePathsI(input) {
     function findUniquePermutations(path) {
         if (path.length < 2) return path;
 
@@ -403,7 +406,7 @@ function uniquePathsI(input) {
     return result;
 }
 
-function uniquePathsII(grid) {
+async function uniquePathsII(grid) {
     let dirs = [[0, 1], [1, 0]]; // only down or right
     let totalPaths = 0;
     function pathfind(x, y) {
@@ -424,7 +427,7 @@ function uniquePathsII(grid) {
 }
 
 /** @param 0 number to solve for **/
-function findLargestPrimeFactor(number) {
+async function findLargestPrimeFactor(number) {
     var primeFactors = [];
     var lowestPrime = 2;
 
@@ -441,7 +444,7 @@ function findLargestPrimeFactor(number) {
 }
 
 /** @param 0 array to solve for **/
-function subarrayWithLargestSum(array) {
+async function subarrayWithLargestSum(array) {
     var bestSubArray = [];
     var bestSubArraySum = -Infinity;
     var subarray = [];
@@ -462,7 +465,7 @@ function subarrayWithLargestSum(array) {
 }
 
 /** @param 0 string to solve for **/
-export function generateIPs(input) {
+async function generateIPs(input) {
     function isValidIP(ip) {
         var passed = true;
 
@@ -506,32 +509,7 @@ export function generateIPs(input) {
     return results;
 }
 
-/** @param 0 array to solve for **/
-function tryAttempt(ns, fn, contract, data, server) {
-    var type = ns.codingcontract.getContractType(contract, server);
-    var description = ns.codingcontract.getDescription(contract, server);
-    var triesRemaining = ns.codingcontract.getNumTriesRemaining(contract, server);
-    var data = ns.codingcontract.getData(contract, server);
-
-    var solution = fn(data);
-    var result = ns.codingcontract.attempt(solution, contract, server);
-
-    if (!result) {
-        ns.alert('='.repeat(30) + '\nCONTRACT FAILED\n' + "=".repeat(30) + '\nContract: ' + contract + '\nType: ' + type + '\nTries Remaining: ' + triesRemaining + '\nDescription' + description + '\n\nDATA: ' + data + '\nSOLUTION: ' + solution + '\n' + '='.repeat(30));
-    } else {
-        ns.alert('='.repeat(30) + '\nCONTRACT SOLVED\n' + "=".repeat(30) + '\nContract: ' + contract + '\nType: ' + type + '\nTries Remaining: ' + triesRemaining + '\nDescription' + description + '\n\nDATA: ' + data + '\nSOLUTION: ' + solution + '\n' + '='.repeat(30));
-    }
-
-    var msg = "CONTRACT: " + String(contract) + String((result) ? " SOLVED" : " NOT SOLVED", 5000);
-    ns.toast(msg);
-    ns.print(msg);
-
-    displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
-
-    return result;
-}
-
-function sanitizeParenthesis(data) {
+async function sanitizeParenthesis(data) {
     function isParenthesis(char) {
         return char == '(' || char == ')';
     }
@@ -590,4 +568,30 @@ function sanitizeParenthesis(data) {
     }
 
     return removeInvalidParenthesis(data);
+}
+
+/** @param 0 array to solve for **/
+async function tryAttempt(ns, fn, contract, data, server) {
+    let contracts = eval('ns.codingcontract');
+    var type = eval('contracts.getContractType(contract, server)');
+    var description = eval('contracts.getDescription(contract, server)');
+    var triesRemaining = eval('contracts.getNumTriesRemaining(contract, server)');
+    var data = eval('contracts.getData(contract, server)');
+
+    var solution = await fn(data);
+    var result = contracts.attempt(solution, contract, server);
+
+    if (!result) {
+        ns.alert('='.repeat(30) + '\nCONTRACT FAILED\n' + "=".repeat(30) + '\nContract: ' + contract + '\nType: ' + type + '\nTries Remaining: ' + triesRemaining + '\nDescription' + description + '\n\nDATA: ' + data + '\nSOLUTION: ' + solution + '\n' + '='.repeat(30));
+    } else {
+        ns.alert('='.repeat(30) + '\nCONTRACT SOLVED\n' + "=".repeat(30) + '\nContract: ' + contract + '\nType: ' + type + '\nTries Remaining: ' + triesRemaining + '\nDescription' + description + '\n\nDATA: ' + data + '\nSOLUTION: ' + solution + '\n' + '='.repeat(30));
+    }
+
+    var msg = "CONTRACT: " + String(contract) + String((result) ? " SOLVED" : " NOT SOLVED", 5000);
+    ns.toast(msg);
+    ns.print(msg);
+
+    displayContractInfo(ns, contract, type, description, triesRemaining, data, solution, result);
+
+    return result;
 }

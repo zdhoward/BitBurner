@@ -130,7 +130,7 @@ export async function main(ns) {
 
         if (false) { //freeRam > 30) { // currently requires 230GB, unrealistically high
             ns.exec("/ui/extend-factions-30GB.js", "home");
-        } else if (freeRam > 14) {
+        } else if (freeRam > 14 && ns.getPlayer().hasWseAccount) {
             ns.exec("/ui/extend-stocks-14GB.js", "home");
         } else if (freeRam > 5.5) {
             ns.exec("/ui/extend-basic-5.5GB.js", "home");

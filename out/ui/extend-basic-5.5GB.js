@@ -1,6 +1,6 @@
 import { StatusContainer } from "/ui/StatusContainer.js";
 import { StatusBarText, StatusBarProgress } from "/ui/StatusBar.js";
-import { getBotnet } from '/lib/lib.js';
+import { getBotnet } from '/nm/lib.js';
 
 const doc = eval('document');
 var visited = {};
@@ -22,7 +22,7 @@ export async function main(ns) {
 
         visited[hostname] = true;
 
-        var remoteHosts = ns.scan(hostname);
+        var remoteHosts = eval("ns.scan(hostname)");
         for (var i in remoteHosts) {
             var remoteHost = remoteHosts[i];
             if (ns.serverExists(remoteHost)) {
