@@ -70,9 +70,8 @@ function displayContractInfo(ns, contract, type, description, triesRemaining, da
  *  @param 1 contract
  */
 async function solveContract(ns, contract, server) {
-    let contracts = eval('ns.codingcontract');
-    var type = eval('contracts.getContractType(contract, server)');
-    var data = eval('contracts.getData(contract, server)');
+    var type = ns.codingcontract.getContractType(contract, server);
+    var data = ns.codingcontract.getData(contract, server);
 
     var result = false;
 
@@ -572,14 +571,13 @@ async function sanitizeParenthesis(data) {
 
 /** @param 0 array to solve for **/
 async function tryAttempt(ns, fn, contract, data, server) {
-    let contracts = eval('ns.codingcontract');
-    var type = eval('contracts.getContractType(contract, server)');
-    var description = eval('contracts.getDescription(contract, server)');
-    var triesRemaining = eval('contracts.getNumTriesRemaining(contract, server)');
-    var data = eval('contracts.getData(contract, server)');
+    var type = ns.codingcontract.getContractType(contract, server);
+    var description = ns.codingcontract.getDescription(contract, server);
+    var triesRemaining = ns.codingcontract.getNumTriesRemaining(contract, server);
+    var data = ns.codingcontract.getData(contract, server);
 
     var solution = await fn(data);
-    var result = contracts.attempt(solution, contract, server);
+    var result = ns.codingcontract.attempt(solution, contract, server);
 
     if (!result) {
         ns.alert('='.repeat(30) + '\nCONTRACT FAILED\n' + "=".repeat(30) + '\nContract: ' + contract + '\nType: ' + type + '\nTries Remaining: ' + triesRemaining + '\nDescription' + description + '\n\nDATA: ' + data + '\nSOLUTION: ' + solution + '\n' + '='.repeat(30));

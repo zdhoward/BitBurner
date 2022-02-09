@@ -7,7 +7,68 @@ export function autocomplete(data, args) {
 /** @param {import("../../.").NS } ns */
 export async function main(ns) {
 
-    displayCorp();
+    //displayCorp();
+
+    //await unassignEmployees();
+    //
+    await hireEmployees();
+    await balanceAutoEmployees();
+
+
+    async function hireEmployees() {
+        let corp = eval("ns.corporation");
+        let info = corp.getCorporation();
+
+        await asyncForEach(info.divisions, async (div) => {
+            await asyncForEach(div.cities, async (city) => {
+                let office = corp.getOffice(div.name, city);
+                if (office.employees.length < office.size) {
+                    let diff = office.size - office.employees.length;
+                    ns.tprint("Hiring " + diff + " employees in " + div.name + " - " + city);
+                    for (let i = 0; i < diff; i++)
+                        await corp.hireEmployee(div.name, city);
+                }
+            });
+        });
+    }
+
+
+    async function unassignEmployees() {
+        let corp = eval("ns.corporation");
+        let info = corp.getCorporation();
+
+        await asyncForEach(info.divisions, async (div) => {
+            await asyncForEach(div.cities, async (city) => {
+                let office = corp.getOffice(div.name, city);
+                await asyncForEach(office.employees, async (employee) => {
+                    await corp.assignJob(div.name, city, employee, 'Unassigned');
+                    ns.tprint(`Unassigned ${employee} from ${div.name} ${city}`);
+                });
+            });
+        });
+    }
+
+    async function balanceAutoEmployees() {
+        let corp = eval("ns.corporation");
+        let info = corp.getCorporation();
+
+        await asyncForEach(info.divisions, async (div) => {
+            await asyncForEach(div.cities, async (city) => {
+                let office = corp.getOffice(div.name, city);
+                let unit = Math.floor(office.size / 6);
+
+                ns.tprint("Balancing " + div.name + " - " + city + " (" + office.employees.length + ")" + " - UNIT: " + unit);
+
+                await corp.setAutoJobAssignment(div.name, city, 'Operations', unit * 2);
+                await corp.setAutoJobAssignment(div.name, city, 'Engineer', unit * 2);
+                await corp.setAutoJobAssignment(div.name, city, 'Business', unit * 1);
+                await corp.setAutoJobAssignment(div.name, city, 'Management', unit * 1);
+
+                let leftovers = office.employees.length - (unit * 6);
+                await corp.setAutoJobAssignment(div.name, city, 'Training', leftovers);
+            });
+        });
+    }
 
 
     function displayCorp() {
@@ -49,3 +110,8 @@ export async function main(ns) {
 
 }
 
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+    }
+}
