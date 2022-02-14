@@ -10,3 +10,9 @@ export async function getScriptInfo(ns) {
 export async function getServerInfo(ns) {
     return JSON.parse(await ns.read('/os/tmp/servers.json'));
 }
+
+export async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+    }
+}

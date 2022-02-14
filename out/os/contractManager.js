@@ -3,6 +3,7 @@ import { helloWorld, getServerInfo, getScriptInfo } from '/os/lib.js';
 
 /** @param {import("../../.").NS } ns */
 export async function main(ns) {
+    ns.tprint("contractManager.js loaded");
     await runContracts(ns);
 }
 

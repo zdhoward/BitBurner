@@ -53,3 +53,10 @@ Structure:
 - /tmp/factions.json
 - /tmp/stocks.json
 - /tmp/corps.json
+
+Milestones:
+$0 - Startup
+$20m - home RAM big enough for ui+contracts+hacking (64Gb?)
+$32b - StockMarket Access
+$150b - Corporation
+$ceiling - faction-manager

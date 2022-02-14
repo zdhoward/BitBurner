@@ -103,7 +103,7 @@ export async function main(ns) {
 
         let batchTime = weakenTime;
 
-        let iterationsToRun = 10;
+        let iterationsToRun = 2;
 
         let growWait = Math.ceil(batchTime - growTime - cycleOffset);
         let weakenWait = 0;

@@ -8,9 +8,11 @@ export function autocomplete(data, args) {
 
 /** @param {import("../..").NS } ns */
 export async function main(ns) {
+    ns.tprint("main.js loaded");
     await ns.run('/os/update.js');
     await ns.run('/os/hackManager.js');
     await ns.run('/os/contractManager.js');
+    //await ns.run('/os/upgradeManager.js');
     //await ns.run('/os/stockManager.js');
     //await ns.run('/os/factionManager.js);
     //await ns.run('/os/hacknetManager.js');
