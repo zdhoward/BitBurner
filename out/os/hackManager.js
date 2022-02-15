@@ -1,26 +1,28 @@
 import { reserveRam, reserveMoney, remoteServers, botServers, factionNames, augNames } from '/os/config.js';
-import { helloWorld, getServerInfo, getScriptInfo } from '/os/lib.js';
+import { helloWorld, getServerInfo, getScriptInfo, printBanner, log, justifyLeft, justifyCentre, justifyRight } from '/os/lib.js';
 
 export function autocomplete(data, args) {
     return [...data.servers];
 }
 
+let verbose = true;
+
 /** @param {import("../../.").NS } ns */
 export async function main(ns) {
-    ns.tprint("hackManager.js loaded");
+    printBanner(ns, "hackManager.js loaded");
     // need to crack servers first
     await crackServers(ns);
     await hackServers(ns);
 }
 
 async function crackServers(ns) {
-    ns.tprint("Cracking servers...");
+    log(ns, "Cracking servers...", verbose);
     let data = await getServerInfo(ns);
 }
 
 /** @param {import("../..").NS } ns */
 export async function hackServers(ns) {
-    ns.tprint("Hacking servers...");
+    log(ns, "Hacking servers...", verbose);
     let data = await getServerInfo(ns);
     //ns.tprint(Object.keys(data));
     let targets = [];
@@ -30,8 +32,8 @@ export async function hackServers(ns) {
             targets.push(server);
         }
     }
-    ns.tprint("Targets: ");
-    ns.tprint(targets);
+    log(ns, "Targets: ", verbose);
+    log(ns, targets, verbose);
     //deployToTargets(ns, Object.keys(data), data);
 }
 

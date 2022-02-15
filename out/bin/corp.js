@@ -131,16 +131,87 @@ export function autocomplete(data, args) {
 export async function main(ns) {
     corp = eval('ns.corporation');
 
-    let funds = corp.getCorporation().funds;
+    if (!ns.getPlayer().hasCorporation) {
+        setupCorporation();
+    } else {
 
-    upgradeCorporation(funds * 0.3);
-    upgradeOffices(funds * 0.65);
-    upgradeWarehouses(funds * 0.05);
+        let funds = corp.getCorporation().funds;
 
-    await hireEmployees();
-    await balanceAutoEmployees();
+        setPrices();
+        corp.issueDividends(0.10);
 
-    //setPrices();
+        //upgradeCorporation(funds * 0.3);
+        upgradeOffices(funds); // * 0.65);
+        upgradeWarehouses(funds * 0.05);
+
+        await hireEmployees();
+        await balanceAutoEmployees();
+
+        ns.tprint("corp.js is done");
+    }
+
+    function setupCorporation() {
+        ns.tprint("Setting up a corporation...");
+
+        // start software company
+        ns.tprint("Starting the software company...");
+        let selfFund = ns.getPlayer().money > 150e9 ? true : false;
+        corp.createCorporation("ZxCorp", selfFund);
+        corp.expandIndustry("Software", "ZxSoft");
+
+        // Expand To All Cities
+        ns.tprint("Expanding to all cities...");
+        corp.expandCity("ZxSoft", "Aevum");
+        corp.expandCity("ZxSoft", "Chongqing");
+        corp.expandCity("ZxSoft", "New Tokyo");
+        corp.expandCity("ZxSoft", "Ishima");
+        corp.expandCity("ZxSoft", "Volhaven");
+
+        // upgrade office sizes to 6
+        ns.tprint("OFFICES NEED TO BE MANUALLY UPGRADED TO 6 EMPLOYEES");
+        ns.tprint("NO OFFICE API TO DO THIS AUTOMATICALLY");
+        ns.tprint("ASSIGN 2 TO EACH: Operations, Engineer, R&D");
+
+        // buy unlocks [Smart Supply]
+        corp.unlockUpgrade("Smart Supply");
+
+        // upgrade warehouses a bunch for insurance fraud
+        ns.tprint("WAREHOUSES NEED TO BE MANUALLY UPGRADED A LOT FOR INSURANCE FRAUD");
+        ns.tprint("NO WAREHOUSE API TO DO THIS AUTOMATICALLY");
+
+        // buy upgrades ['Smart Factories': 5, 'ABC SalesBots': 5, 'Stat Boosters': 5, 'Wilson Analytics': 1, 'DreamSense':1]
+
+        // set AI Cores to sell MAX @ MP
+        //    Might be a bug where I can enable Market-TA.II
+        // start developing first Software
+    }
+
+    function insuranceFraud() {
+        // purchase a certain amount of warehouse space
+        // stockpile best quality product or output until warehouse is full
+        // sell all products @ MP
+        // wait a couple seconds
+        // get investors
+    }
+
+    function buyShares() {
+        // if public, buy as many shares as possible
+    }
+
+    function expandIndustries() {
+        // SOFTWARE FIRST
+        // TOBACCO SECOND
+        // ROBOTS THIRD
+    }
+
+    function expandCities(divName) {
+        // if money is available
+        // expand to as many cities as possible
+        // upgrade office size
+        // set prices
+        // hire employees
+        // start developing product
+    }
 
     function buyBoosters() {
         // if instant buy is unlocked
@@ -159,10 +230,14 @@ export async function main(ns) {
                 corp.setSmartSupply(div.name, city, true);
 
                 industries[div.type].outputs.forEach(function (output) {
+                    corp.setMaterialMarketTA2(div.name, city, output.type, false);
+                    corp.sellMaterial(div.name, city, output.type, "MAX", "MP", false);
                     corp.setMaterialMarketTA2(div.name, city, output.type, true);
                 });
 
                 div.products.forEach(function (product) {
+                    corp.setProductMarketTA2(div.name, product, false);
+                    corp.sellProduct(div.name, city, product, "MAX", "MP", true);
                     corp.setProductMarketTA2(div.name, product, true);
                 });
             });
@@ -171,62 +246,79 @@ export async function main(ns) {
     }
 
     function upgradeOffices(moneyToSpend) {
+        ns.tprint('Upgrading Office Sizes with $' + moneyToSpend);
         let info = corp.getCorporation();
 
-        let hasPurchased = false;
-        do {
-            hasPurchased = false;
-            info.divisions.forEach(function (div) {
-                div.cities.forEach(function (city) {
-                    // upgrade size
-                    var cost = corp.getOfficeSizeUpgradeCost(div.name, city, 6);
-                    if (cost <= moneyToSpend) {
-                        moneyToSpend -= cost;
-                        corp.upgradeOfficeSize(div.name, city, 6);
-                        hasPurchased = true;
-                        ns.tprint("Upgrading " + div.name + " - " + city + " by 6");
-                    }
-                });
+        let offices = {};
+
+        let currentMaxSize = 0;
+        info.divisions.forEach(function (div) {
+            offices[div.name] = {};
+            div.cities.forEach(function (city) {
+                let size = corp.getOffice(div.name, city).size;
+                offices[div.name][city] = size;
+                if (size > currentMaxSize)
+                    currentMaxSize = size;
             });
-        } while (hasPurchased);
+        });
+
+        Object.keys(offices).forEach(function (div) {
+            Object.keys(offices[div]).forEach(function (city) {
+                if (offices[div][city] < currentMaxSize) {
+                    let cost = corp.getOfficeSizeUpgradeCost(div, city, 6);
+                    while (moneyToSpend > cost && offices[div][city] < currentMaxSize) {
+                        corp.upgradeOfficeSize(div, city, 6);
+                        //ns.tprint('Upgrading ' + div + ' - ' + city + ' Office to ' + (offices[div][city] + 6));
+                        moneyToSpend -= cost;
+                        offices[div][city] += 6;
+                        cost = corp.getOfficeSizeUpgradeCost(div, city, 6);
+                    }
+                }
+            });
+        });
     }
 
     function upgradeWarehouses(moneyToSpend) {
+        ns.tprint('Upgrading Warehouse Sizes with $' + moneyToSpend);
         let info = corp.getCorporation();
 
-        let hasPurchased = false;
-        do {
-            hasPurchased = false;
-            info.divisions.forEach(function (div) {
-                div.cities.forEach(function (city) {
-                    // upgrade size
-                    var cost = corp.getUpgradeWarehouseCost(div.name, city);
-                    if (cost <= moneyToSpend) {
-                        moneyToSpend -= cost;
-                        corp.upgradeWarehouse(div.name, city);
-                        hasPurchased = true;
-                        ns.tprint("Upgrading warehouse size for " + div.name + " - " + city);
-                    }
-                });
+        let warehouses = {};
+
+        let currentMaxLevel = 0;
+        info.divisions.forEach(function (div) {
+            warehouses[div.name] = {};
+            div.cities.forEach(function (city) {
+                let level = corp.getWarehouse(div.name, city).level;
+                warehouses[div.name][city] = level;
+                if (level > currentMaxLevel)
+                    currentMaxLevel = level;
             });
-        } while (hasPurchased);
+        });
+
+        Object.keys(warehouses).forEach(function (div) {
+            Object.keys(warehouses[div]).forEach(function (city) {
+                if (warehouses[div][city] < currentMaxLevel) {
+                    let cost = corp.getUpgradeWarehouseCost(div, city);
+                    while (moneyToSpend > cost && warehouses[div][city] < currentMaxLevel) {
+                        corp.upgradeWarehouse(div, city);
+                        //ns.tprint('Upgrading ' + div + ' - ' + city + ' Warehouse to ' + (warehouses[div][city] + 1));
+                        moneyToSpend -= cost;
+                        warehouses[div][city]++;
+                        cost = corp.getUpgradeWarehouseCost(div, city);
+                    }
+                }
+            });
+        });
     }
 
     function upgradeCorporation(moneyToSpend) {
         // check what can be unlocked
-        // upgrade important stuff according
-    }
+        //corp.hasUnlockUpgrade('Smart Supply');
+        // corp.unlockUpgrade('Smart Supply');
 
-    function setupCorporation() {
-        // start software company
-        // buy unlocks [Smart Supply]
-        // buy upgrades ['Smart Factories': 5, 'ABC SalesBots': 5, 'Stat Boosters': 5, 'Wilson Analytics': 1, 'DreamSense':1]
-        // focus on first city
-        // upgrade office size to 18?
-        // upgrade warehouse to 10?
-        // set AI Cores to sell MAX @ MP
-        //    Might be a bug where I can enable Market-TA.II
-        // start developing first Software
+        // upgrade important stuff according
+        //corp.getUpgradeLevelCost('Smart Factories');
+        //corp.levelUpgrade('Smart Factories');
     }
 
     async function hireEmployees() {
@@ -276,12 +368,12 @@ export async function main(ns) {
                 //ns.tprint("Unit: " + unit + " | Unitx6: " + (unit * 6) + " | Rnd: " + rnd + " | Leftovers: " + leftovers);
 
                 // Unallocate
-                await corp.setAutoJobAssignment(div.name, city, 'Training', 1);
                 await corp.setAutoJobAssignment(div.name, city, 'Operations', 1);
                 await corp.setAutoJobAssignment(div.name, city, 'Engineer', 1);
                 await corp.setAutoJobAssignment(div.name, city, 'Business', 1);
                 await corp.setAutoJobAssignment(div.name, city, 'Management', 1);
                 await corp.setAutoJobAssignment(div.name, city, 'Research & Development', 1);
+                await corp.setAutoJobAssignment(div.name, city, 'Training', 1);
 
                 // Reallocate
                 await corp.setAutoJobAssignment(div.name, city, 'Training', leftovers);

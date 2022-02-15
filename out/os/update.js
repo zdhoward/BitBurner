@@ -1,8 +1,11 @@
 import { reserveRam, reserveMoney, remoteServers, factionNames, augNames } from '/os/config.js';
+import { helloWorld, getServerInfo, getScriptInfo, printBanner, log, justifyLeft, justifyCentre, justifyRight } from '/os/lib.js';
+
 
 /** @param {import("../../.").NS } ns */
 export async function main(ns) {
-    ns.tprint("update.js loaded");
+    printBanner(ns, "update.js loaded");
+
     await updateScripts(ns);
     await updateServers(ns);
 }
